@@ -11,22 +11,22 @@ TEXTS = {
 
         # ── Xush kelibsiz ────────────────────────────────────
         "welcome": (
-            "👋 Salom, *{name}*!\n\n"
+            "👋 Salom, <b>{name}</b>!\n\n"
             "📤 Quyidagilarni yuboring:\n"
             "🎬 Video\n"
             "🎤 Ovozli xabar\n"
             "🎵 MP3 fayl\n"
             "🔗 YouTube / Instagram havola\n\n"
-            "📊 Reja: *{plan}*\n"
-            "📈 Bugungi foydalanish: *{used}/{limit}*"
+            "📊 Reja: <b>{plan}</b>\n"
+            "📈 Bugungi foydalanish: <b>{used}/{limit}</b>"
         ),
         "free_plan":        "🆓 Bepul",
         "premium_plan":     "⭐ Premium",
 
         # ── Limit ────────────────────────────────────────────
         "limit_reached": (
-            "❌ Kunlik limitga yetdingiz (*{limit}* ta).\n\n"
-            "⭐ *Premium* oling — cheksiz foydalaning!"
+            "❌ Kunlik limitga yetdingiz (<b>{limit}</b> ta).\n\n"
+            "⭐ <b>Premium</b> oling — cheksiz foydalaning!"
         ),
 
         # ── Qayta ishlash ────────────────────────────────────
@@ -35,7 +35,7 @@ TEXTS = {
         "uploading":        "📤 Yuborilmoqda...",
 
         # ── Fayl tanlash ─────────────────────────────────────
-        "choose_action":    "✅ Yuklandi! ⏱ *{dur}*\n\nNima qilishni xohlaysiz?",
+        "choose_action":    "✅ Yuklandi! ⏱ <b>{dur}</b>\n\nNima qilishni xohlaysiz?",
         "full_extract":     "▶️ To'liq ovoz",
         "trim_btn":         "✂️ Kesib olish",
         "speed_btn":        "🔄 Tezlik o'zgartirish",
@@ -44,21 +44,21 @@ TEXTS = {
 
         # ── Trim ─────────────────────────────────────────────
         "enter_start": (
-            "📍 *Boshlanish vaqtini* kiriting:\n"
-            "_Misol: `1:30` yoki `90` (soniya)_\n\n"
-            "⏱ Davomiylik: *{dur}*"
+            "📍 <b>Boshlanish vaqtini</b> kiriting:\n"
+            "_Misol: <code>1:30</code> yoki <code>90</code> (soniya)_\n\n"
+            "⏱ Davomiylik: <b>{dur}</b>"
         ),
         "enter_end": (
-            "📍 *Tugash vaqtini* kiriting:\n"
-            "_Misol: `3:00` yoki `180` (soniya)_\n\n"
-            "⏮ Boshlanish: *{start}*"
+            "📍 <b>Tugash vaqtini</b> kiriting:\n"
+            "_Misol: <code>3:00</code> yoki <code>180</code> (soniya)_\n\n"
+            "⏮ Boshlanish: <b>{start}</b>"
         ),
-        "bad_time":         "❌ Noto'g'ri format.\n_Misol: `1:30` yoki `90`_",
+        "bad_time":         "❌ Noto'g'ri format.\n_Misol: <code>1:30</code> yoki <code>90</code>_",
         "time_over":        "❌ Video {dur}. Kichikroq qiymat kiriting.",
         "end_before_start": "❌ Tugash vaqti boshlanishdan katta bo'lishi kerak.",
 
         # ── Tezlik ───────────────────────────────────────────
-        "choose_speed":     "🔄 *Tezlikni tanlang:*",
+        "choose_speed":     "🔄 <b>Tezlikni tanlang:</b>",
         "speed_05":         "🐢 0.5x (Sekin)",
         "speed_075":        "🚶 0.75x",
         "speed_10":         "▶️ 1.0x (Normal)",
@@ -90,49 +90,49 @@ TEXTS = {
         "yt_too_big":       "⚠️ Fayl {size} MB — Telegram 50 MB qabul qiladi.\nKichikroq sifat tanlang.",
 
         # ── Premium ───────────────────────────────────────────
-        "already_premium":  "⭐ Sizda allaqachon Premium faol!\n📅 *{until}* gacha",
+        "already_premium":  "⭐ Sizda allaqachon Premium faol!\n📅 <b>{until}</b> gacha",
         "stars_invoice_title": "⭐ VTVS Premium",
         "stars_invoice_desc":  "30 kunlik Premium obuna — cheksiz imkoniyatlar!",
         "stars_success": (
-            "🎉 *To'lov qabul qilindi!*\n\n"
-            "⭐ *{days} kunlik Premium* faollashtirildi!\n"
-            "📅 *{until}* gacha\n\n"
+            "🎉 <b>To'lov qabul qilindi!</b>\n\n"
+            "⭐ <b>{days} kunlik Premium</b> faollashtirildi!\n"
+            "📅 <b>{until}</b> gacha\n\n"
             "✂️ Endi istalgan videoni kesib oling!"
         ),
         "pay_confirmed": (
-            "🎉 *Tabriklaymiz!*\n\n"
+            "🎉 <b>Tabriklaymiz!</b>\n\n"
             "✅ To'lovingiz tasdiqlandi!\n"
-            "⭐ *{days} kunlik Premium* faollashtirildi!\n"
-            "📅 *{until}* gacha"
+            "⭐ <b>{days} kunlik Premium</b> faollashtirildi!\n"
+            "📅 <b>{until}</b> gacha"
         ),
         "pay_rejected": (
-            "❌ *To'lovingiz tasdiqlanmadi.*\n\n"
+            "❌ <b>To'lovingiz tasdiqlanmadi.</b>\n\n"
             "Muammo bo'lsa to'lov ma'lumotlarini tekshiring."
         ),
         "i_paid":           "✅ To'lov qildim",
         "pay_stars":        "⭐ Telegram Stars bilan",
         "get_premium":      "⭐ Premium olish",
-        "send_screenshot":  "📸 To'lov chekining *screenshotini* yuboring:",
+        "send_screenshot":  "📸 To'lov chekining <b>screenshotini</b> yuboring:",
         "screenshot_sent":  "✅ Screenshot yuborildi!\n⏳ Admin tekshirmoqda...",
 
         # ── Promo kod ─────────────────────────────────────────
-        "enter_promo":      "🎟 *Promo-kodni* kiriting:",
+        "enter_promo":      "🎟 <b>Promo-kodni</b> kiriting:",
         "promo_btn":        "🎟 Promo-kod",
-        "promo_ok":         "✅ Promo-kod qabul qilindi!\n🎁 *+{days} kun* Premium qo'shildi!",
+        "promo_ok":         "✅ Promo-kod qabul qilindi!\n🎁 <b>+{days} kun</b> Premium qo'shildi!",
         "promo_invalid":    "❌ Promo-kod noto'g'ri yoki muddati o'tgan.",
         "promo_used":       "❌ Bu promo-kodni siz allaqachon ishlatgansiz.",
 
         # ── Referal ───────────────────────────────────────────
         "ref_info": (
-            "👥 *Referal dasturi*\n\n"
-            "Har bir taklif qilgan do'stingiz uchun *+{bonus} kun* bonus!\n\n"
-            "🔗 Sizning havolangiz:\n`{link}`\n\n"
-            "✅ Taklif qilganlar: *{count}* ta\n"
-            "🎁 Jami bonus kunlar: *{days}* kun"
+            "👥 <b>Referal dasturi</b>\n\n"
+            "Har bir taklif qilgan do'stingiz uchun <b>+{bonus} kun</b> bonus!\n\n"
+            "🔗 Sizning havolangiz:\n<code>{link}</code>\n\n"
+            "✅ Taklif qilganlar: <b>{count}</b> ta\n"
+            "🎁 Jami bonus kunlar: <b>{days}</b> kun"
         ),
         "ref_bonus_received": (
-            "🎁 *{name}* sizning havolangiz orqali qo'shildi!\n"
-            "⭐ *+{bonus} kun* Premium bonus qo'shildi!"
+            "🎁 <b>{name}</b> sizning havolangiz orqali qo'shildi!\n"
+            "⭐ <b>+{bonus} kun</b> Premium bonus qo'shildi!"
         ),
         "ref_bonus_note": (
             "ℹ️ Bonus kunlar Premium obunangizga qo'shiladi.\n"
@@ -141,22 +141,22 @@ TEXTS = {
 
         # ── Premium tugash ogohlantiruvi ──────────────────────
         "premium_expiring": (
-            "⚠️ *Diqqat!*\n\n"
-            "Sizning Premium obunangiz *{days} kun* ichida tugaydi.\n"
-            "📅 Tugash sanasi: *{until}*\n\n"
+            "⚠️ <b>Diqqat!</b>\n\n"
+            "Sizning Premium obunangiz <b>{days} kun</b> ichida tugaydi.\n"
+            "📅 Tugash sanasi: <b>{until}</b>\n\n"
             "Uzluksiz foydalanish uchun yangilang 👇"
         ),
 
         # ── Foydalanuvchi statistikasi ────────────────────────
         "my_stats": (
-            "📊 *Sizning statistikangiz:*\n\n"
-            "👤 Ism: *{name}*\n"
-            "🎯 Reja: *{plan}*\n"
-            "📅 Premium: *{until}*\n"
-            "📈 Bugungi foydalanish: *{used}/{limit}*\n"
-            "📦 Jami qayta ishlangan: *{total}* ta\n"
-            "👥 Taklif qilganlar: *{refs}* ta\n"
-            "📅 Ro'yxatdan: *{since}*"
+            "📊 <b>Sizning statistikangiz:</b>\n\n"
+            "👤 Ism: <b>{name}</b>\n"
+            "🎯 Reja: <b>{plan}</b>\n"
+            "📅 Premium: <b>{until}</b>\n"
+            "📈 Bugungi foydalanish: <b>{used}/{limit}</b>\n"
+            "📦 Jami qayta ishlangan: <b>{total}</b> ta\n"
+            "👥 Taklif qilganlar: <b>{refs}</b> ta\n"
+            "📅 Ro'yxatdan: <b>{since}</b>"
         ),
         "prem_until":       "{date} gacha",
         "no_premium":       "Yo'q",
@@ -185,44 +185,44 @@ TEXTS = {
         "choose_lang":      "🌐 Выберите язык:",
         "lang_saved":       "✅ Язык сохранён: Русский 🇷🇺",
         "welcome": (
-            "👋 Привет, *{name}*!\n\n"
+            "👋 Привет, <b>{name}</b>!\n\n"
             "📤 Отправьте:\n"
             "🎬 Видео\n"
             "🎤 Голосовое сообщение\n"
             "🎵 MP3 файл\n"
             "🔗 Ссылку YouTube / Instagram\n\n"
-            "📊 Тариф: *{plan}*\n"
-            "📈 Использований сегодня: *{used}/{limit}*"
+            "📊 Тариф: <b>{plan}</b>\n"
+            "📈 Использований сегодня: <b>{used}/{limit}</b>"
         ),
         "free_plan":        "🆓 Бесплатный",
         "premium_plan":     "⭐ Премиум",
         "limit_reached": (
-            "❌ Дневной лимит исчерпан (*{limit}*).\n\n"
-            "⭐ Оформите *Премиум* — без ограничений!"
+            "❌ Дневной лимит исчерпан (<b>{limit}</b>).\n\n"
+            "⭐ Оформите <b>Премиум</b> — без ограничений!"
         ),
         "processing":       "⏳ Обрабатывается...",
         "downloading":      "⬇️ Загрузка...",
         "uploading":        "📤 Отправляется...",
-        "choose_action":    "✅ Загружено! ⏱ *{dur}*\n\nЧто хотите сделать?",
+        "choose_action":    "✅ Загружено! ⏱ <b>{dur}</b>\n\nЧто хотите сделать?",
         "full_extract":     "▶️ Полный звук",
         "trim_btn":         "✂️ Обрезать",
         "speed_btn":        "🔄 Изменить скорость",
         "vocal_btn":        "🎙 Выделить вокал",
         "noise_btn":        "🔇 Убрать шум",
         "enter_start": (
-            "📍 *Введите время начала*:\n"
-            "_Пример: `1:30` или `90` (секунд)_\n\n"
-            "⏱ Длительность: *{dur}*"
+            "📍 <b>Введите время начала</b>:\n"
+            "_Пример: <code>1:30</code> или <code>90</code> (секунд)_\n\n"
+            "⏱ Длительность: <b>{dur}</b>"
         ),
         "enter_end": (
-            "📍 *Введите время конца*:\n"
-            "_Пример: `3:00` или `180` (секунд)_\n\n"
-            "⏮ Начало: *{start}*"
+            "📍 <b>Введите время конца</b>:\n"
+            "_Пример: <code>3:00</code> или <code>180</code> (секунд)_\n\n"
+            "⏮ Начало: <b>{start}</b>"
         ),
-        "bad_time":         "❌ Неверный формат.\n_Пример: `1:30` или `90`_",
+        "bad_time":         "❌ Неверный формат.\n_Пример: <code>1:30</code> или <code>90</code>_",
         "time_over":        "❌ Видео {dur}. Введите меньшее значение.",
         "end_before_start": "❌ Конец должен быть больше начала.",
-        "choose_speed":     "🔄 *Выберите скорость:*",
+        "choose_speed":     "🔄 <b>Выберите скорость:</b>",
         "speed_05":         "🐢 0.5x (Медленно)",
         "speed_075":        "🚶 0.75x",
         "speed_10":         "▶️ 1.0x (Нормально)",
@@ -248,64 +248,64 @@ TEXTS = {
         "q_audio":          "🎵 Только аудио",
         "free_quality_only":"❌ Бесплатные пользователи: только 360p и аудио.\n\n⭐ Оформите Премиум!",
         "yt_too_big":       "⚠️ Файл {size} МБ — Telegram принимает до 50 МБ.\nВыберите меньшее качество.",
-        "already_premium":  "⭐ У вас уже активен Премиум!\n📅 До *{until}*",
+        "already_premium":  "⭐ У вас уже активен Премиум!\n📅 До <b>{until}</b>",
         "stars_invoice_title": "⭐ VTVS Премиум",
         "stars_invoice_desc":  "30-дневная Премиум подписка — безлимитные возможности!",
         "stars_success": (
-            "🎉 *Оплата получена!*\n\n"
-            "⭐ *Премиум на {days} дней* активирован!\n"
-            "📅 До *{until}*"
+            "🎉 <b>Оплата получена!</b>\n\n"
+            "⭐ <b>Премиум на {days} дней</b> активирован!\n"
+            "📅 До <b>{until}</b>"
         ),
         "pay_confirmed": (
-            "🎉 *Поздравляем!*\n\n"
+            "🎉 <b>Поздравляем!</b>\n\n"
             "✅ Оплата подтверждена!\n"
-            "⭐ *Премиум на {days} дней* активирован!\n"
-            "📅 До *{until}*"
+            "⭐ <b>Премиум на {days} дней</b> активирован!\n"
+            "📅 До <b>{until}</b>"
         ),
         "pay_rejected": (
-            "❌ *Оплата не подтверждена.*\n\n"
+            "❌ <b>Оплата не подтверждена.</b>\n\n"
             "Проверьте данные оплаты и попробуйте снова."
         ),
         "i_paid":           "✅ Я оплатил",
         "pay_stars":        "⭐ Telegram Stars",
         "get_premium":      "⭐ Получить Премиум",
-        "send_screenshot":  "📸 Отправьте *скриншот* чека оплаты:",
+        "send_screenshot":  "📸 Отправьте <b>скриншот</b> чека оплаты:",
         "screenshot_sent":  "✅ Скриншот отправлен!\n⏳ Проверяется администратором...",
-        "enter_promo":      "🎟 Введите *промо-код*:",
+        "enter_promo":      "🎟 Введите <b>промо-код</b>:",
         "promo_btn":        "🎟 Промо-код",
-        "promo_ok":         "✅ Промо-код принят!\n🎁 *+{days} дней* Премиум добавлено!",
+        "promo_ok":         "✅ Промо-код принят!\n🎁 <b>+{days} дней</b> Премиум добавлено!",
         "promo_invalid":    "❌ Промо-код неверный или просрочен.",
         "promo_used":       "❌ Вы уже использовали этот промо-код.",
         "ref_info": (
-            "👥 *Реферальная программа*\n\n"
-            "За каждого приглашённого *+{bonus} дней* бонуса!\n\n"
-            "🔗 Ваша ссылка:\n`{link}`\n\n"
-            "✅ Приглашено: *{count}*\n"
-            "🎁 Бонусных дней: *{days}*"
+            "👥 <b>Реферальная программа</b>\n\n"
+            "За каждого приглашённого <b>+{bonus} дней</b> бонуса!\n\n"
+            "🔗 Ваша ссылка:\n<code>{link}</code>\n\n"
+            "✅ Приглашено: <b>{count}</b>\n"
+            "🎁 Бонусных дней: <b>{days}</b>"
         ),
         "ref_bonus_received": (
-            "🎁 *{name}* присоединился по вашей ссылке!\n"
-            "⭐ *+{bonus} дней* Премиум бонуса!"
+            "🎁 <b>{name}</b> присоединился по вашей ссылке!\n"
+            "⭐ <b>+{bonus} дней</b> Премиум бонуса!"
         ),
         "ref_bonus_note": (
             "ℹ️ Бонусные дни добавляются к вашей Premium подписке.\n"
             "Если Премиум не активен — дни добавятся к следующей подписке."
         ),
         "premium_expiring": (
-            "⚠️ *Внимание!*\n\n"
-            "Ваш Премиум заканчивается через *{days} дн.*\n"
-            "📅 Дата окончания: *{until}*\n\n"
+            "⚠️ <b>Внимание!</b>\n\n"
+            "Ваш Премиум заканчивается через <b>{days} дн.</b>\n"
+            "📅 Дата окончания: <b>{until}</b>\n\n"
             "Продлите для непрерывного использования 👇"
         ),
         "my_stats": (
-            "📊 *Ваша статистика:*\n\n"
-            "👤 Имя: *{name}*\n"
-            "🎯 Тариф: *{plan}*\n"
-            "📅 Премиум: *{until}*\n"
-            "📈 Сегодня: *{used}/{limit}*\n"
-            "📦 Обработано всего: *{total}*\n"
-            "👥 Приглашено: *{refs}*\n"
-            "📅 Зарегистрирован: *{since}*"
+            "📊 <b>Ваша статистика:</b>\n\n"
+            "👤 Имя: <b>{name}</b>\n"
+            "🎯 Тариф: <b>{plan}</b>\n"
+            "📅 Премиум: <b>{until}</b>\n"
+            "📈 Сегодня: <b>{used}/{limit}</b>\n"
+            "📦 Обработано всего: <b>{total}</b>\n"
+            "👥 Приглашено: <b>{refs}</b>\n"
+            "📅 Зарегистрирован: <b>{since}</b>"
         ),
         "prem_until":       "до {date}",
         "no_premium":       "Нет",
@@ -330,44 +330,44 @@ TEXTS = {
         "choose_lang":      "🌐 Choose language:",
         "lang_saved":       "✅ Language saved: English 🇬🇧",
         "welcome": (
-            "👋 Hello, *{name}*!\n\n"
+            "👋 Hello, <b>{name}</b>!\n\n"
             "📤 Send me:\n"
             "🎬 Video\n"
             "🎤 Voice message\n"
             "🎵 MP3 file\n"
             "🔗 YouTube / Instagram link\n\n"
-            "📊 Plan: *{plan}*\n"
-            "📈 Today's usage: *{used}/{limit}*"
+            "📊 Plan: <b>{plan}</b>\n"
+            "📈 Today's usage: <b>{used}/{limit}</b>"
         ),
         "free_plan":        "🆓 Free",
         "premium_plan":     "⭐ Premium",
         "limit_reached": (
-            "❌ Daily limit reached (*{limit}*).\n\n"
-            "⭐ Get *Premium* — unlimited usage!"
+            "❌ Daily limit reached (<b>{limit}</b>).\n\n"
+            "⭐ Get <b>Premium</b> — unlimited usage!"
         ),
         "processing":       "⏳ Processing...",
         "downloading":      "⬇️ Downloading...",
         "uploading":        "📤 Uploading...",
-        "choose_action":    "✅ Loaded! ⏱ *{dur}*\n\nWhat would you like to do?",
+        "choose_action":    "✅ Loaded! ⏱ <b>{dur}</b>\n\nWhat would you like to do?",
         "full_extract":     "▶️ Full audio",
         "trim_btn":         "✂️ Trim audio",
         "speed_btn":        "🔄 Change speed",
         "vocal_btn":        "🎙 Isolate vocals",
         "noise_btn":        "🔇 Remove noise",
         "enter_start": (
-            "📍 *Enter start time*:\n"
-            "_Example: `1:30` or `90` (seconds)_\n\n"
-            "⏱ Duration: *{dur}*"
+            "📍 <b>Enter start time</b>:\n"
+            "_Example: <code>1:30</code> or <code>90</code> (seconds)_\n\n"
+            "⏱ Duration: <b>{dur}</b>"
         ),
         "enter_end": (
-            "📍 *Enter end time*:\n"
-            "_Example: `3:00` or `180` (seconds)_\n\n"
-            "⏮ Start: *{start}*"
+            "📍 <b>Enter end time</b>:\n"
+            "_Example: <code>3:00</code> or <code>180</code> (seconds)_\n\n"
+            "⏮ Start: <b>{start}</b>"
         ),
-        "bad_time":         "❌ Invalid format.\n_Example: `1:30` or `90`_",
+        "bad_time":         "❌ Invalid format.\n_Example: <code>1:30</code> or <code>90</code>_",
         "time_over":        "❌ Video is {dur}. Enter a smaller value.",
         "end_before_start": "❌ End time must be greater than start.",
-        "choose_speed":     "🔄 *Choose speed:*",
+        "choose_speed":     "🔄 <b>Choose speed:</b>",
         "speed_05":         "🐢 0.5x (Slow)",
         "speed_075":        "🚶 0.75x",
         "speed_10":         "▶️ 1.0x (Normal)",
@@ -393,64 +393,64 @@ TEXTS = {
         "q_audio":          "🎵 Audio only",
         "free_quality_only":"❌ Free users: only 360p and audio.\n\n⭐ Get Premium!",
         "yt_too_big":       "⚠️ File is {size} MB — Telegram accepts up to 50 MB.\nChoose lower quality.",
-        "already_premium":  "⭐ You already have active Premium!\n📅 Until *{until}*",
+        "already_premium":  "⭐ You already have active Premium!\n📅 Until <b>{until}</b>",
         "stars_invoice_title": "⭐ VTVS Premium",
         "stars_invoice_desc":  "30-day Premium subscription — unlimited features!",
         "stars_success": (
-            "🎉 *Payment received!*\n\n"
-            "⭐ *{days}-day Premium* activated!\n"
-            "📅 Until *{until}*"
+            "🎉 <b>Payment received!</b>\n\n"
+            "⭐ <b>{days}-day Premium</b> activated!\n"
+            "📅 Until <b>{until}</b>"
         ),
         "pay_confirmed": (
-            "🎉 *Congratulations!*\n\n"
+            "🎉 <b>Congratulations!</b>\n\n"
             "✅ Payment confirmed!\n"
-            "⭐ *{days}-day Premium* activated!\n"
-            "📅 Until *{until}*"
+            "⭐ <b>{days}-day Premium</b> activated!\n"
+            "📅 Until <b>{until}</b>"
         ),
         "pay_rejected": (
-            "❌ *Payment not confirmed.*\n\n"
+            "❌ <b>Payment not confirmed.</b>\n\n"
             "Please check payment details and try again."
         ),
         "i_paid":           "✅ I paid",
         "pay_stars":        "⭐ Pay with Stars",
         "get_premium":      "⭐ Get Premium",
-        "send_screenshot":  "📸 Send *screenshot* of your payment receipt:",
+        "send_screenshot":  "📸 Send <b>screenshot</b> of your payment receipt:",
         "screenshot_sent":  "✅ Screenshot sent!\n⏳ Being reviewed by admin...",
-        "enter_promo":      "🎟 Enter *promo code*:",
+        "enter_promo":      "🎟 Enter <b>promo code</b>:",
         "promo_btn":        "🎟 Promo code",
-        "promo_ok":         "✅ Promo code accepted!\n🎁 *+{days} days* Premium added!",
+        "promo_ok":         "✅ Promo code accepted!\n🎁 <b>+{days} days</b> Premium added!",
         "promo_invalid":    "❌ Invalid or expired promo code.",
         "promo_used":       "❌ You have already used this promo code.",
         "ref_info": (
-            "👥 *Referral Program*\n\n"
-            "Get *+{bonus} days* for each friend you invite!\n\n"
-            "🔗 Your link:\n`{link}`\n\n"
-            "✅ Referred: *{count}*\n"
-            "🎁 Bonus days: *{days}*"
+            "👥 <b>Referral Program</b>\n\n"
+            "Get <b>+{bonus} days</b> for each friend you invite!\n\n"
+            "🔗 Your link:\n<code>{link}</code>\n\n"
+            "✅ Referred: <b>{count}</b>\n"
+            "🎁 Bonus days: <b>{days}</b>"
         ),
         "ref_bonus_received": (
-            "🎁 *{name}* joined via your link!\n"
-            "⭐ *+{bonus} days* Premium bonus added!"
+            "🎁 <b>{name}</b> joined via your link!\n"
+            "⭐ <b>+{bonus} days</b> Premium bonus added!"
         ),
         "ref_bonus_note": (
             "ℹ️ Bonus days are added to your Premium subscription.\n"
             "If no active Premium — days added to your next subscription."
         ),
         "premium_expiring": (
-            "⚠️ *Attention!*\n\n"
-            "Your Premium expires in *{days} days*.\n"
-            "📅 Expiry: *{until}*\n\n"
+            "⚠️ <b>Attention!</b>\n\n"
+            "Your Premium expires in <b>{days} days</b>.\n"
+            "📅 Expiry: <b>{until}</b>\n\n"
             "Renew to continue uninterrupted 👇"
         ),
         "my_stats": (
-            "📊 *Your statistics:*\n\n"
-            "👤 Name: *{name}*\n"
-            "🎯 Plan: *{plan}*\n"
-            "📅 Premium: *{until}*\n"
-            "📈 Today: *{used}/{limit}*\n"
-            "📦 Total processed: *{total}*\n"
-            "👥 Referred: *{refs}*\n"
-            "📅 Joined: *{since}*"
+            "📊 <b>Your statistics:</b>\n\n"
+            "👤 Name: <b>{name}</b>\n"
+            "🎯 Plan: <b>{plan}</b>\n"
+            "📅 Premium: <b>{until}</b>\n"
+            "📈 Today: <b>{used}/{limit}</b>\n"
+            "📦 Total processed: <b>{total}</b>\n"
+            "👥 Referred: <b>{refs}</b>\n"
+            "📅 Joined: <b>{since}</b>"
         ),
         "prem_until":       "until {date}",
         "no_premium":       "None",
