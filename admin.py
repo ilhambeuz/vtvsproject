@@ -29,6 +29,20 @@ from keyboards import (
 
 logger = logging.getLogger(__name__)
 
+# Admin keyboard barcha tugmalari - state bilan konflikt bo'lmasin
+ADMIN_MENU_BTNS = {
+    '📊 Statistika', '🌍 Davlatlar', '📢 Xabar yuborish',
+    '📅 Rejalashtirilgan', '👑 Yaqinda premium', '🏆 Ko'p sotib olgan',
+    '✅ Premium berish', '❌ Premium olish', '🚫 Ban', '✅ Unban',
+    '📋 Banlanganlar', '📋 Kutayotgan to'lovlar', '💳 To'lov matni',
+    '❓ Help matni', '🎟 Promo kodlar', '➕ Promo yaratish',
+    '✍️ Oddiy xabar', '↩️ Forward rejim', '🖼 Ko'p mediali reklama',
+    '📅 Rejalashtirilgan', '◀️ Orqaga', '❌ Bekor',
+    '✅ Ha, yubor', '⏭ Caption yo'q',
+    '🇺🇿 O'zbek matni', '🇷🇺 Rus matni', '🇬🇧 Ingliz matni',
+}
+
+
 # language_code → bayroq
 FLAG = {
     "uz": "🇺🇿", "ru": "🇷🇺", "en": "🇬🇧", "tr": "🇹🇷",
@@ -254,7 +268,15 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ════════════════════════════════════════════════
     #  PROMO KOD YARATISH
     # ════════════════════════════════════════════════
-    if st == "promo_create":
+    if st == "promo_create" and text not in (
+        "📊 Statistika", "🌍 Davlatlar", "📢 Xabar yuborish",
+        "📅 Rejalashtirilgan", "👑 Yaqinda premium", "🏆 Ko'p sotib olgan",
+        "✅ Premium berish", "❌ Premium olish", "🚫 Ban", "✅ Unban",
+        "📋 Banlanganlar", "📋 Kutayotgan to'lovlar", "💳 To'lov matni",
+        "❓ Help matni", "🎟 Promo kodlar", "➕ Promo yaratish",
+        "✍️ Oddiy xabar", "↩️ Forward rejim", "🖼 Ko'p mediali reklama",
+        "◀️ Orqaga", "❌ Bekor",
+    ):
         # Format: KOD 30 100  (kod, kun, max_uses)
         parts = text.strip().split()
         try:
@@ -324,7 +346,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ════════════════════════════════════════════════
     #  BAN / UNBAN
     # ════════════════════════════════════════════════
-    if st == "ban_id":
+    if st == "ban_id" and text not in ADMIN_MENU_BTNS:
         try:
             parts = text.strip().split(None, 1)
             tid    = int(parts[0])
@@ -343,7 +365,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Format: ID [sabab]")
         return
 
-    if st == "unban_id":
+    if st == "unban_id" and text not in ADMIN_MENU_BTNS:
         try:
             tid = int(text.strip())
             unban_user(tid, update.effective_user.id)
@@ -363,7 +385,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ════════════════════════════════════════════════
     #  PREMIUM BERISH / OLISH
     # ════════════════════════════════════════════════
-    if st == "grant_id":
+    if st == "grant_id" and text not in ADMIN_MENU_BTNS:
         try:
             parts = text.strip().split()
             tid   = int(parts[0])
@@ -390,7 +412,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ Format: ID [kunlar]")
         return
 
-    if st == "revoke_id":
+    if st == "revoke_id" and text not in ADMIN_MENU_BTNS:
         try:
             tid = int(text.strip())
             revoke_premium(tid)
@@ -434,6 +456,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
     elif text == "📢 Xabar yuborish":
+        ud["in_bc_menu"] = True
         await update.message.reply_text(
             "📢 *Xabar yuborish usulini tanlang:*\n\n"
             "✍️ Oddiy — matn, rasm, video, GIF...\n"
@@ -473,9 +496,11 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     elif text == "📅 Rejalashtirilgan":
-        if ud.get("st") == "bc_type":
+        bc_st = ud.get("st")
+        if bc_st in ("bc_type", None) and ud.get("in_bc_menu"):
             # Broadcast rejimida
             ud["st"] = "bc_scheduled_msg"
+            ud.pop("in_bc_menu", None)
             await update.message.reply_text(
                 "📅 *Rejalashtirilgan broadcast*\n\nYubormoqchi bo'lgan xabarni yuboring:",
                 parse_mode="Markdown",
