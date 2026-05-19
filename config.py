@@ -11,7 +11,7 @@ ADMIN_IDS        = [5016497622]           # Bir nechta admin: [111, 222, 333]
 
 # ── Fayllar ───────────────────────────────────────────────
 TEMP_DIR         = "temp"
-DB_PATH          = "vtvs.db"
+DB_PATH          = "/app/data/vtvs.db"
 
 # ── Premium ───────────────────────────────────────────────
 PREMIUM_DAYS     = 30
