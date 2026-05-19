@@ -841,12 +841,17 @@ async def _check_limit_cb(q, uid: int, lang: str) -> bool:
 async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE, url: str):
     u    = update.effective_user
     lang = get_lang(u.id)
-    msgs = {
-        "uz": "⏳ YouTube/Instagram yuklab olish hozircha vaqtincha ochirilib turibdi. Tez orada qayta ishga tushiriladi!",
-        "ru": "⏳ Загрузка YouTube/Instagram временно отключена. Скоро снова заработает!",
-        "en": "⏳ YouTube/Instagram downloading is temporarily disabled. It will be back soon!",
-    }
-    await update.message.reply_text(msgs.get(lang, msgs["en"]))
+    prem = is_premium(u.id)
+
+    if not await limit_check(update, u.id, lang):
+        return
+
+    context.user_data["yt_url"] = url
+    qkey = "choose_quality_p" if prem else "choose_quality"
+    await update.message.reply_text(
+        tx(lang, qkey),
+        reply_markup=quality_kb(lang, prem),
+    )
 
 
 # ════════════════════════════════════════════════════════
