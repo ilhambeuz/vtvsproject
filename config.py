@@ -34,3 +34,4 @@ WEEKLY_STATS_DAY  = 0         # Haftalik statistika (0=Dushanba)
 USE_DEMUCS = False
 
 os.makedirs(TEMP_DIR, exist_ok=True)
+#test deploy
