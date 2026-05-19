@@ -1,5 +1,5 @@
 """
-👑 VTVS Bot — Admin panel handlerlari
+Admin panel handlerlari - Markdown ishlatilmagan
 """
 import json
 import logging
@@ -8,367 +8,264 @@ from datetime import datetime
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from config import ADMINIDS, PREMIUMDAYS
+from config import ADMIN_IDS, PREMIUM_DAYS
 from database import (
-    getstats, getcountry_stats,
-    getpremiumrecent, getpremiumtop,
-    grantpremium, revokepremium,
-    banuser, unbanuser, getbannedusers,
-    getpendingpayments, setpaymentstatus, get_payment,
-    getsetting, setsetting,
-    createpromo, getpromolist, togglepromo,
-    savescheduledbc, getscheduledlist, cancel_scheduled,
-    alluserids,
+    get_stats, get_country_stats,
+    get_premium_recent, get_premium_top,
+    grant_premium, revoke_premium,
+    ban_user, unban_user, get_banned_users,
+    get_pending_payments, set_payment_status, get_payment,
+    get_setting, set_setting,
+    create_promo, get_promo_list,
+    save_scheduled_bc, get_scheduled_list, cancel_scheduled,
+    all_user_ids,
 )
-from broadcast import broadcastsingle, broadcastalbum, msgtodict, done_text
+from broadcast import broadcast_single, broadcast_album, msg_to_dict, done_text
 from keyboards import (
-    ADMINKB, BCTYPEKB, MEDIACOLLECTKB, CONFIRMKB,
-    CAPTIONKB, LANGEDITKB, CANCELKB,
-    adminpaykb,
+    ADMIN_KB, BC_TYPE_KB, MEDIA_COLLECT_KB, CONFIRM_KB,
+    CAPTION_KB, LANG_EDIT_KB, CANCEL_KB, admin_pay_kb,
 )
 
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
-# Admin keyboard barcha tugmalari - state bilan konflikt bo'lmasin
-ADMINMENUBTNS = {
-    "📊 Statistika", "🌍 Davlatlar", "📢 Xabar yuborish",
-    "📅 Rejalashtirilgan", "👑 Yaqinda premium", "🏆 Ko'p sotib olgan",
-    "✅ Premium berish", "❌ Premium olish", "🚫 Ban", "✅ Unban",
-    "📋 Banlanganlar", "📋 Kutayotgan to'lovlar", "💳 To'lov matni",
-    "❓ Help matni", "🎟 Promo kodlar", "➕ Promo yaratish",
-    "✍️ Oddiy xabar", "↩️ Forward rejim", "🖼 Ko'p mediali reklama",
-    "◀️ Orqaga", "❌ Bekor", "✅ Ha, yubor", "⏭ Caption yo'q",
-    "🇺🇿 O'zbek matni", "🇷🇺 Rus matni", "🇬🇧 Ingliz matni",
-}
-
-
-# language_code → bayroq
 FLAG = {
-    "uz": "🇺🇿", "ru": "🇷🇺", "en": "🇬🇧", "tr": "🇹🇷",
-    "fa": "🇮🇷", "ar": "🇸🇦", "id": "🇮🇩", "de": "🇩🇪",
-    "fr": "🇫🇷", "es": "🇪🇸", "pt": "🇧🇷", "zh-hans": "🇨🇳",
-    "zh-hant": "🇹🇼", "ja": "🇯🇵", "ko": "🇰🇷", "uk": "🇺🇦",
-    "kk": "🇰🇿", "ky": "🇰🇬", "tg": "🇹🇯", "tk": "🇹🇲",
-    "az": "🇦🇿", "he": "🇮🇱", "hi": "🇮🇳", "unknown": "🌍",
+    "uz": "Ozbekiston", "ru": "Rossiya", "en": "Ingliz",
+    "tr": "Turkiya", "fa": "Eron", "ar": "Arab",
+    "id": "Indoneziya", "de": "Germaniya", "fr": "Fransiya",
+    "unknown": "Noma'lum",
 }
 
 
-async def send_long(msg, text: str, kb, chunk: int = 4000):
-    """Uzun xabarni bo'lib yuborish."""
-    parts = [text[i:i + chunk] for i in range(0, len(text), chunk)]
+def _is_menu_btn(text):
+    menu_words = [
+        "Statistika", "Davlatlar", "Xabar yuborish", "Rejalashtirilgan",
+        "premium", "Ban", "Unban", "Banlanganlar", "lovlar", "matni",
+        "Help matni", "Promo", "Oddiy xabar", "Forward", "mediali",
+        "Orqaga", "Bekor", "Ha, yubor", "Caption", "matni",
+    ]
+    for w in menu_words:
+        if w in text:
+            return True
+    return False
+
+
+async def send_long(msg, text, kb, chunk=4000):
+    parts = [text[i:i+chunk] for i in range(0, len(text), chunk)]
     for i, p in enumerate(parts):
-        await msg.reply_text(
-            p,
-            reply_markup=kb if i == len(parts) - 1 else None,
-        )
+        await msg.reply_text(p, reply_markup=kb if i == len(parts)-1 else None)
 
 
-# ════════════════════════════════════════════════════════
-#  ADMIN MEDIA HANDLER
-# ════════════════════════════════════════════════════════
-async def onmedia(update: Update, context: ContextTypes.DEFAULTTYPE):
-    """Admin rasm/video yuborganda."""
+async def on_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
     msg = update.message
     ud  = context.user_data
     st  = ud.get("st")
 
-    if st == "bcmediacollect":
+    if st == "bc_media_collect":
         items = ud.setdefault("bc_items", [])
         from config import MAX_ALBUM
         if len(items) >= MAX_ALBUM:
-            await msg.reply_text(
-                f"⚠️ Maksimal {MAX_ALBUM} ta. '✅ Reklama tayyor' bosing.",
-                replymarkup=MEDIACOLLECT_KB,
-            )
+            await msg.reply_text("Maximum " + str(MAX_ALBUM) + " ta.", reply_markup=MEDIA_COLLECT_KB)
             return
-
         if msg.photo:
-            items.append({"type": "photo", "fileid": msg.photo[-1].fileid})
-            icon = "📸"
+            items.append({"type": "photo", "file_id": msg.photo[-1].file_id})
+            icon = "Rasm"
         elif msg.video:
-            items.append({"type": "video", "fileid": msg.video.fileid})
-            icon = "🎬"
+            items.append({"type": "video", "file_id": msg.video.file_id})
+            icon = "Video"
         else:
-            await msg.replytext("⚠️ Faqat 📸 yoki 🎬 yuboring.", replymarkup=MEDIACOLLECTKB)
+            await msg.reply_text("Faqat rasm yoki video.", reply_markup=MEDIA_COLLECT_KB)
             return
-
         n = len(items)
         await msg.reply_text(
-            f"{icon} {n}/10 qo'shildi.\n" +
-            ("Yana qo'shing yoki 'Tayyor' bosing." if n < MAX_ALBUM
-             else "Limit to'ldi. '✅ Tayyor' bosing."),
-            replymarkup=MEDIACOLLECT_KB,
+            icon + " qoshildi! " + str(n) + "/" + str(MAX_ALBUM),
+            reply_markup=MEDIA_COLLECT_KB,
         )
         return
 
-    if st in ("bcsingle", "bcforward"):
-        src = msgtodict(msg)
-        uids = alluserids()
-        ud["st"]  = f"{st}_confirm"
+    if st in ("bc_single", "bc_forward"):
+        src  = msg_to_dict(msg)
+        uids = all_user_ids()
+        ud["st"]  = st + "_confirm"
         ud["src"] = src
         await msg.reply_text(
-            f"📢 Tasdiqlang:\n\n"
-            f"📌 Tur: {src['type']}\n"
-            f"👥 Yuboriladi: {len(uids)} ta",
-            replymarkup=CONFIRMKB,
+            "Tasdiqlang:\nTur: " + str(src.get("type","?")) + "\nYuboriladi: " + str(len(uids)) + " ta",
+            reply_markup=CONFIRM_KB,
         )
 
 
-# ════════════════════════════════════════════════════════
-#  ADMIN TEXT HANDLER
-# ════════════════════════════════════════════════════════
-async def ontext(update: Update, context: ContextTypes.DEFAULTTYPE):
+async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text or ""
     ud   = context.user_data
     bot  = context.bot
     st   = ud.get("st")
 
-    # ── Universal bekor qilish ────────────────────────
-    if text == "❌ Bekor":
+    if "Bekor" in text and len(text) < 20:
         ud.clear()
-        await update.message.replytext("❌ Bekor qilindi.", replymarkup=ADMIN_KB)
+        await update.message.reply_text("Bekor qilindi.", reply_markup=ADMIN_KB)
         return
 
-    # ════════════════════════════════════════════════
-    #  BROADCAST STATE MACHINE
-    # ════════════════════════════════════════════════
-
-    if st == "bcmediacollect" and text == "✅ Reklama tayyor":
+    if st == "bc_media_collect" and "Reklama tayyor" in text:
         items = ud.get("bc_items", [])
         if not items:
-            await update.message.replytext("⚠️ Hali hech narsa yo'q.", replymarkup=MEDIACOLLECTKB)
+            await update.message.reply_text("Hali hech narsa yoq!", reply_markup=MEDIA_COLLECT_KB)
             return
         ud["st"] = "bc_caption"
         await update.message.reply_text(
-            f"✅ {len(items)} ta media qo'shildi!\n\n"
-            "📝 Matn (caption) yuboring yoki '⏭ Caption yo'q' bosing.",
-            replymarkup=CAPTIONKB,
+            str(len(items)) + " ta media qoshildi! Reklama matnini yuboring yoki Caption yoq bosing.",
+            reply_markup=CAPTION_KB,
         )
         return
 
     if st == "bc_caption":
-        caption = "" if text == "⏭ Caption yo'q" else text
+        caption = "" if "Caption" in text else text
         items   = ud.get("bc_items", [])
-        uids    = alluserids()
-        ud["st"]         = "bcalbumconfirm"
+        uids    = all_user_ids()
+        ud["st"]         = "bc_album_confirm"
         ud["bc_caption"] = caption
         p = sum(1 for x in items if x["type"] == "photo")
         v = sum(1 for x in items if x["type"] == "video")
-        cap_prev = (caption[:60] + "...") if len(caption) > 60 else caption
         await update.message.reply_text(
-            f"🖼 Tasdiqlang:\n\n"
-            f"📸 {p} rasm | 🎬 {v} video\n"
-            f"📝 {cap_prev or "Yoq"}\n"
-            f"👥 {len(uids)} ta foydalanuvchi\n\nYuborilsinmi?",
-            replymarkup=CONFIRMKB,
+            "Tasdiqlang:\nRasm: " + str(p) + " | Video: " + str(v) +
+            "\nYuboriladi: " + str(len(uids)) + " ta",
+            reply_markup=CONFIRM_KB,
         )
         return
 
-    if st in ("bcsingle", "bcforward") and text not in ("✅ Ha, yubor",):
-        # Matnli xabar
-        src  = msgtodict(update.message)
-        uids = alluserids()
-        ud["st"]  = f"{st}_confirm"
-        ud["src"] = src
-        prev = (text[:80] + "...") if len(text) > 80 else text
-        await update.message.reply_text(
-            f"✍️ Tasdiqlang:\n\n{prev}\n\n👥 {len(uids)} ta",
-            replymarkup=CONFIRMKB,
-        )
-        return
-
-    # ── HA, YUBOR ────────────────────────────────────
-    if text == "✅ Ha, yubor":
-        if st == "bcsingleconfirm":
-            src  = ud.pop("src", {})
-            ud.clear()
-            uids = alluserids()
-            prog = await update.message.reply_text(
-                f"📢 Yuborilmoqda... 0/{len(uids)}", replymarkup=ADMINKB
-            )
-            ok, fail = await broadcast_single(bot, src, uids, prog)
-            await prog.edit_text(
-                done_text("Xabar yuborildi!", ok, fail, len(uids)),
+    if st in ("bc_single", "bc_forward") and "Ha, yubor" not in text:
+        if not _is_menu_btn(text):
+            src  = msg_to_dict(update.message)
+            uids = all_user_ids()
+            ud["st"]  = st + "_confirm"
+            ud["src"] = src
+            prev = text[:80] + "..." if len(text) > 80 else text
+            await update.message.reply_text(
+                "Tasdiqlang:\n" + prev + "\nYuboriladi: " + str(len(uids)) + " ta",
+                reply_markup=CONFIRM_KB,
             )
             return
 
-        if st == "bcforwardconfirm":
+    if "Ha, yubor" in text:
+        if st == "bc_single_confirm":
             src  = ud.pop("src", {})
             ud.clear()
-            uids = alluserids()
-            prog = await update.message.reply_text(
-                f"↩️ Forward qilinmoqda... 0/{len(uids)}", replymarkup=ADMINKB
-            )
+            uids = all_user_ids()
+            prog = await update.message.reply_text("Yuborilmoqda... 0/" + str(len(uids)), reply_markup=ADMIN_KB)
             ok, fail = await broadcast_single(bot, src, uids, prog)
-            await prog.edit_text(
-                done_text("Forward yuborildi!", ok, fail, len(uids)),
-            )
+            await prog.edit_text(done_text("Xabar yuborildi!", ok, fail, len(uids)))
             return
 
-        if st == "bcalbumconfirm":
+        if st == "bc_forward_confirm":
+            src  = ud.pop("src", {})
+            ud.clear()
+            uids = all_user_ids()
+            prog = await update.message.reply_text("Forward qilinmoqda... 0/" + str(len(uids)), reply_markup=ADMIN_KB)
+            ok, fail = await broadcast_single(bot, src, uids, prog)
+            await prog.edit_text(done_text("Forward yuborildi!", ok, fail, len(uids)))
+            return
+
+        if st == "bc_album_confirm":
             items   = ud.pop("bc_items", [])
             caption = ud.pop("bc_caption", "")
             ud.clear()
-            uids = alluserids()
-            prog = await update.message.reply_text(
-                f"🖼 Reklama yuborilmoqda... 0/{len(uids)}", replymarkup=ADMINKB
-            )
+            uids = all_user_ids()
+            prog = await update.message.reply_text("Reklama yuborilmoqda... 0/" + str(len(uids)), reply_markup=ADMIN_KB)
             ok, fail = await broadcast_album(bot, items, caption, uids, prog)
-            await prog.edit_text(
-                done_text("Reklama yuborildi!", ok, fail, len(uids),
-                          extra=f"🖼 Media: {len(items)} ta"),
-            )
+            await prog.edit_text(done_text("Reklama yuborildi!", ok, fail, len(uids)))
             return
 
-        if st == "bcscheduledconfirm":
+        if st == "bc_scheduled_confirm":
             src  = ud.pop("src", {})
             sdt  = ud.pop("sched_dt", "")
             uid  = update.effective_user.id
             ud.clear()
-            bcid = savescheduled_bc(src, sdt, uid)
-            await update.message.reply_text(
-                f"✅ Rejalashtirildi!\n📅 {sdt[:16]}\n🆔 #{bc_id}",
-                replymarkup=ADMINKB,
-            )
+            bc_id = save_scheduled_bc(src, sdt, uid)
+            await update.message.reply_text("Rejalashtirildi! ID: " + str(bc_id), reply_markup=ADMIN_KB)
             return
 
-    # ════════════════════════════════════════════════
-    #  TO'LOV MATNI TAHRIRLASH
-    # ════════════════════════════════════════════════
-    if st in ("editpayuz", "editpayru", "editpayen"):
-        langmap = {"editpayuz": "uz", "editpayru": "ru", "editpay_en": "en"}
-        lang = lang_map[st]
-        setsetting("paymenttext", lang, text)
+    if st in ("edit_pay_uz", "edit_pay_ru", "edit_pay_en"):
+        lang = {"edit_pay_uz": "uz", "edit_pay_ru": "ru", "edit_pay_en": "en"}[st]
+        set_setting("payment_text", lang, text)
         ud.clear()
-        await update.message.reply_text(
-            f"✅ To'lov matni saqlandi! ({lang.upper()})", replymarkup=ADMINKB
-        )
+        await update.message.reply_text("Tolov matni saqlandi! (" + lang.upper() + ")", reply_markup=ADMIN_KB)
         return
 
-    if st in ("edithelpuz", "edithelpru", "edithelpen"):
-        langmap = {"edithelpuz": "uz", "edithelpru": "ru", "edithelp_en": "en"}
-        lang = lang_map[st]
-        setsetting("helptext", lang, text)
+    if st in ("edit_help_uz", "edit_help_ru", "edit_help_en"):
+        lang = {"edit_help_uz": "uz", "edit_help_ru": "ru", "edit_help_en": "en"}[st]
+        set_setting("help_text", lang, text)
         ud.clear()
-        await update.message.reply_text(
-            f"✅ Help matni saqlandi! ({lang.upper()})", replymarkup=ADMINKB
-        )
+        await update.message.reply_text("Help matni saqlandi! (" + lang.upper() + ")", reply_markup=ADMIN_KB)
         return
 
-    # ════════════════════════════════════════════════
-    #  PROMO KOD YARATISH
-    # ════════════════════════════════════════════════
-    if st == "promo_create" and text not in (
-        "📊 Statistika", "🌍 Davlatlar", "📢 Xabar yuborish",
-        "📅 Rejalashtirilgan", "👑 Yaqinda premium", "🏆 Ko'p sotib olgan",
-        "✅ Premium berish", "❌ Premium olish", "🚫 Ban", "✅ Unban",
-        "📋 Banlanganlar", "📋 Kutayotgan to'lovlar", "💳 To'lov matni",
-        "❓ Help matni", "🎟 Promo kodlar", "➕ Promo yaratish",
-        "✍️ Oddiy xabar", "↩️ Forward rejim", "🖼 Ko'p mediali reklama",
-        "◀️ Orqaga", "❌ Bekor",
-    ):
-        # Format: KOD 30 100  (kod, kun, max_uses)
+    if st == "promo_create" and not _is_menu_btn(text):
         parts = text.strip().split()
         try:
-            code = parts[0].upper()
-            days = int(parts[1]) if len(parts) > 1 else PREMIUM_DAYS
+            code  = parts[0].upper()
+            days  = int(parts[1]) if len(parts) > 1 else PREMIUM_DAYS
             max_u = int(parts[2]) if len(parts) > 2 else -1
-            ok = createpromo(code, days, maxu)
+            ok    = create_promo(code, days, max_u)
             ud.clear()
-            if ok:
-                await update.message.reply_text(
-                    f"✅ Promo kod yaratildi!\n"
-                    f"🎟 Kod: {code}\n"
-                    f"📅 Kunlar: {days}\n"
-                    f"Max: {'Cheksiz' if maxu == -1 else maxu}",
-                    replymarkup=ADMINKB,
-                )
-            else:
-                await update.message.reply_text(
-                    "❌ Bu kod allaqachon mavjud.", replymarkup=ADMINKB
-                )
+            max_str = "Cheksiz" if max_u == -1 else str(max_u)
+            msg_txt = ("Promo kod yaratildi!\nKod: " + code + "\nKunlar: " + str(days) + "\nMax: " + max_str) if ok else "Bu kod allaqachon mavjud."
+            await update.message.reply_text(msg_txt, reply_markup=ADMIN_KB)
         except (IndexError, ValueError):
-            await update.message.reply_text(
-                "❌ Format: KOD 30 100\nkod kun maxuses_",
-            )
+            await update.message.reply_text("Format: KOD 30 100\nMisol: SUMMER50 30 100")
         return
 
-    # ════════════════════════════════════════════════
-    #  REJALASHTIRILGAN BROADCAST
-    # ════════════════════════════════════════════════
-    if st == "bcscheduledmsg":
-        src = msgtodict(update.message)
-        ud["st"]  = "bcscheduleddt"
+    if st == "bc_scheduled_msg":
+        src = msg_to_dict(update.message)
+        ud["st"]  = "bc_scheduled_dt"
         ud["src"] = src
-        await update.message.reply_text(
-            "📅 Yuborish vaqtini kiriting:\n"
-            "Format: DD.MM.YYYY HH:MM\n"
-            "Misol: 25.12.2025 10:00",
-        )
+        await update.message.reply_text("Vaqtni kiriting:\nFormat: KK.OO.YYYY SS:MM\nMisol: 25.12.2025 10:00")
         return
 
-    if st == "bcscheduleddt":
+    if st == "bc_scheduled_dt":
         try:
             dt = datetime.strptime(text.strip(), "%d.%m.%Y %H:%M")
             if dt <= datetime.now():
-                await update.message.reply_text("❌ Vaqt o'tib ketgan. Kelajak vaqt kiriting.")
+                await update.message.reply_text("Vaqt otib ketgan!")
                 return
             ud["sched_dt"] = dt.isoformat()
-            ud["st"]       = "bcscheduledconfirm"
-            uids = alluserids()
+            ud["st"]       = "bc_scheduled_confirm"
+            uids = all_user_ids()
             await update.message.reply_text(
-                f"📅 Tasdiqlang:\n\n"
-                f"🕐 Vaqt: {text.strip()}\n"
-                f"👥 {len(uids)} ta foydalanuvchi\n\nYuborilsinmi?",
-                replymarkup=CONFIRMKB,
+                "Tasdiqlang:\nVaqt: " + text.strip() + "\nYuboriladi: " + str(len(uids)) + " ta",
+                reply_markup=CONFIRM_KB,
             )
         except ValueError:
-            await update.message.reply_text(
-                "❌ Format noto'g'ri. Misol: 25.12.2025 10:00",
-            )
+            await update.message.reply_text("Format notogri. Misol: 25.12.2025 10:00")
         return
 
-    # ════════════════════════════════════════════════
-    #  BAN / UNBAN
-    # ════════════════════════════════════════════════
-    if st == "banid" and text not in ADMINMENU_BTNS:
+    if st == "ban_id" and not _is_menu_btn(text):
         try:
-            parts = text.strip().split(None, 1)
+            parts  = text.strip().split(None, 1)
             tid    = int(parts[0])
             reason = parts[1] if len(parts) > 1 else ""
-            banuser(tid, update.effectiveuser.id, reason)
+            ban_user(tid, update.effective_user.id, reason)
             ud.clear()
-            await update.message.reply_text(
-                f"🚫 Foydalanuvchi ban qilindi.\n🆔 {tid}", replymarkup=ADMINKB,
-            )
+            await update.message.reply_text("Ban qilindi. ID: " + str(tid), reply_markup=ADMIN_KB)
             try:
-                await bot.send_message(tid, "🚫 Siz botdan ban qilindingiz.")
+                await bot.send_message(tid, "Siz botdan ban qilindingiz.")
             except Exception:
                 pass
         except (ValueError, IndexError):
-            await update.message.reply_text("❌ Format: ID [sabab]")
+            await update.message.reply_text("Format: ID [sabab]")
         return
 
-    if st == "unbanid" and text not in ADMINMENU_BTNS:
+    if st == "unban_id" and not _is_menu_btn(text):
         try:
             tid = int(text.strip())
-            unbanuser(tid, update.effectiveuser.id)
+            unban_user(tid, update.effective_user.id)
             ud.clear()
-            await update.message.reply_text(
-                f"✅ Foydalanuvchi unban qilindi.\n🆔 {tid}", replymarkup=ADMINKB,
-            )
+            await update.message.reply_text("Unban qilindi. ID: " + str(tid), reply_markup=ADMIN_KB)
             try:
-                await bot.send_message(tid, "✅ Sizning baningiz olib tashlandi.")
+                await bot.send_message(tid, "Baningiz olib tashlandi.")
             except Exception:
                 pass
         except ValueError:
-            await update.message.reply_text("❌ Faqat ID kiriting.")
+            await update.message.reply_text("Faqat ID kiriting.")
         return
 
-    # ════════════════════════════════════════════════
-    #  PREMIUM BERISH / OLISH
-    # ════════════════════════════════════════════════
-    if st == "grantid" and text not in ADMINMENU_BTNS:
+    if st == "grant_id" and not _is_menu_btn(text):
         try:
             parts = text.strip().split()
             tid   = int(parts[0])
@@ -376,325 +273,253 @@ async def ontext(update: Update, context: ContextTypes.DEFAULTTYPE):
             until = grant_premium(tid, days)
             ud.clear()
             await update.message.reply_text(
-                f"✅ Premium berildi!\n🆔 {tid}\n"
-                f"📅 {until.strftime('%d.%m.%Y')} gacha", replymarkup=ADMINKB,
+                "Premium berildi! ID: " + str(tid) + "\n" + until.strftime("%d.%m.%Y") + " gacha",
+                reply_markup=ADMIN_KB,
             )
             from database import get_lang
-            tl = get_lang(tid)
             from translations import tx
+            tl = get_lang(tid)
             try:
-                await bot.send_message(
-                    tid,
-                    tx(tl, "pay_confirmed", days=days, until=until.strftime("%d.%m.%Y")),
-                )
+                await bot.send_message(tid, tx(tl, "pay_confirmed", days=days, until=until.strftime("%d.%m.%Y")))
             except Exception:
                 pass
         except (ValueError, IndexError):
-            await update.message.reply_text("❌ Format: ID [kunlar]")
+            await update.message.reply_text("Format: ID [kunlar]")
         return
 
-    if st == "revokeid" and text not in ADMINMENU_BTNS:
+    if st == "revoke_id" and not _is_menu_btn(text):
         try:
             tid = int(text.strip())
             revoke_premium(tid)
             ud.clear()
-            await update.message.reply_text(
-                f"✅ Premium bekor qilindi.\n🆔 {tid}", replymarkup=ADMINKB,
-            )
+            await update.message.reply_text("Premium bekor qilindi. ID: " + str(tid), reply_markup=ADMIN_KB)
         except ValueError:
-            await update.message.reply_text("❌ Faqat ID kiriting.")
+            await update.message.reply_text("Faqat ID kiriting.")
         return
 
-    # ════════════════════════════════════════════════
-    #  ASOSIY MENYUSI
-    # ════════════════════════════════════════════════
+    if "zbek matni" in text:
+        edit_key = ud.get("st_edit")
+        if edit_key:
+            ud["st"] = "edit_" + edit_key.replace("_text","") + "_uz"
+            current  = get_setting(edit_key).get("uz", "")
+            await update.message.reply_text("Joriy (UZ):\n" + current + "\n\nYangi matnni yuboring:", reply_markup=CANCEL_KB)
+        return
 
-    if text == "📊 Statistika":
+    if "Rus matni" in text:
+        edit_key = ud.get("st_edit")
+        if edit_key:
+            ud["st"] = "edit_" + edit_key.replace("_text","") + "_ru"
+            current  = get_setting(edit_key).get("ru", "")
+            await update.message.reply_text("Joriy (RU):\n" + current + "\n\nYangi matnni yuboring:", reply_markup=CANCEL_KB)
+        return
+
+    if "Ingliz matni" in text:
+        edit_key = ud.get("st_edit")
+        if edit_key:
+            ud["st"] = "edit_" + edit_key.replace("_text","") + "_en"
+            current  = get_setting(edit_key).get("en", "")
+            await update.message.reply_text("Joriy (EN):\n" + current + "\n\nYangi matnni yuboring:", reply_markup=CANCEL_KB)
+        return
+
+    if "Statistika" in text and "Davlatlar" not in text:
         s = get_stats()
         await update.message.reply_text(
-            f"📊 BOT STATISTIKASI\n{'━'*26}\n"
-            f"👥 Jami: {s['total']}\n"
-            f"🟢 Aktiv (7 kun): {s['active']}\n"
-            f"🔴 Nofaol: {s['inactive']}\n"
-            f"⭐ Premium: {s['premium']}\n"
-            f"🚫 Banned: {s['banned']}\n"
-            f"{"="*26}\n"
-            f"📅 Bugun yangi: +{s['new_today']}\n"
-            f"📅 Hafta: +{s['new_week']}\n"
-            f"📅 Oy: +{s['new_month']}\n"
-            f"{"="*26}\n"
-            f"💳 Kutayotgan to'lovlar: {s['pendingpays']}", replymarkup=ADMIN_KB,
+            "BOT STATISTIKASI\n" + "="*20 + "\n"
+            "Jami: " + str(s["total"]) + "\n"
+            "Aktiv (7 kun): " + str(s["active"]) + "\n"
+            "Nofaol: " + str(s["inactive"]) + "\n"
+            "Premium: " + str(s["premium"]) + "\n"
+            "Banned: " + str(s["banned"]) + "\n" + "="*20 + "\n"
+            "Bugun yangi: +" + str(s["new_today"]) + "\n"
+            "Hafta: +" + str(s["new_week"]) + "\n"
+            "Oy: +" + str(s["new_month"]) + "\n" + "="*20 + "\n"
+            "Kutayotgan tolovlar: " + str(s["pending_pays"]),
+            reply_markup=ADMIN_KB,
         )
 
-    elif text == "🌍 Davlatlar":
-        rows = getcountrystats()
-        lines = ["🌍 Davlatlar bo'yicha statistika:\n"]
+    elif "Davlatlar" in text:
+        rows  = get_country_stats()
+        lines = ["Davlatlar statistikasi:\n"]
         for code, cnt in rows:
-            flag = FLAG.get(code, "🌍")
-            lines.append(f"{flag} {code}: {cnt} ta")
-        await sendlong(update.message, "\n".join(lines), ADMINKB)
+            name = FLAG.get(code, code)
+            lines.append(name + " (" + code + "): " + str(cnt) + " ta")
+        await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
-    elif text == "📢 Xabar yuborish":
-        ud["inbcmenu"] = True
+    elif "Xabar yuborish" in text:
+        ud["in_bc_menu"] = True
         await update.message.reply_text(
-            "📢 Xabar yuborish usulini tanlang:\n\n"
-            "✍️ Oddiy — matn, rasm, video, GIF...\n"
-            "↩️ Forward — xabarni forward qilish\n"
-            "🖼 Ko'p mediali — album (10 ta gacha)\n"
-            "📅 Rejalashtirilgan — belgilangan vaqtda",
-            replymarkup=BCTYPE_KB,
+            "Xabar yuborish usulini tanlang:",
+            reply_markup=BC_TYPE_KB,
         )
 
-    elif text == "✍️ Oddiy xabar":
+    elif "Oddiy xabar" in text:
         ud["st"] = "bc_single"
-        await update.message.reply_text(
-            "Yubormoqchi bolgan xabarni yuboring (matn, rasm, video, GIF, fayl...):",
-            replymarkup=CANCELKB,
-        )
+        await update.message.reply_text("Yubormoqchi bolgan xabarni yuboring:", reply_markup=CANCEL_KB)
 
-    elif text == "↩️ Forward rejim":
+    elif "Forward rejim" in text:
         ud["st"] = "bc_forward"
-        await update.message.reply_text(
-            "↩️ Forward qilmoqchi bolgan xabarni forward qiling:",
-            replymarkup=CANCELKB,
-        )
+        await update.message.reply_text("Forward qilmoqchi bolgan xabarni forward qiling:", reply_markup=CANCEL_KB)
 
-    elif text == "🖼 Ko'p mediali reklama":
-        ud["st"]       = "bcmediacollect"
+    elif "mediali reklama" in text:
+        ud["st"]       = "bc_media_collect"
         ud["bc_items"] = []
         from config import MAX_ALBUM
         await update.message.reply_text(
-            f"🖼 Ko'p mediali reklama\n\n"
-            f"📸/🎬 Rasm/video yuboring (max {MAX_ALBUM} ta)",
-            replymarkup=MEDIACOLLECT_KB,
+            "Ko'p mediali reklama\nRasm va/yoki video yuboring (max " + str(MAX_ALBUM) + " ta):",
+            reply_markup=MEDIA_COLLECT_KB,
         )
 
-    elif text == "📅 Rejalashtirilgan":
-        bc_st = ud.get("st")
-        if bcst in ("bctype", None) and ud.get("inbcmenu"):
-            # Broadcast rejimida
-            ud["st"] = "bcscheduledmsg"
-            ud.pop("inbcmenu", None)
-            await update.message.reply_text(
-                "Rejalashtirilgan broadcast - yubormoqchi bolgan xabarni yuboring:",
-                replymarkup=CANCELKB,
-            )
+    elif "Rejalashtirilgan" in text:
+        if ud.get("in_bc_menu"):
+            ud["st"] = "bc_scheduled_msg"
+            ud.pop("in_bc_menu", None)
+            await update.message.reply_text("Rejalashtirilgan broadcast - xabarni yuboring:", reply_markup=CANCEL_KB)
         else:
-            # Ro'yxatni ko'rsatish
-            rows = getscheduledlist()
+            rows = get_scheduled_list()
             if not rows:
-                await update.message.reply_text(
-                    "📅 Rejalashtirilgan broadcastlar yo'q.", replymarkup=ADMINKB
-                )
+                await update.message.reply_text("Rejalashtirilgan broadcastlar yoq.", reply_markup=ADMIN_KB)
                 return
-            lines = ["📅 Rejalashtirilgan xabarlar:\n"]
-            for bcid, schedat, status, _ in rows:
-                lines.append(f"• #{bcid} — {schedat[:16]} [{status}]")
-            lines.append("\nBekor qilish uchun: /cancel_bc ID")
-            await sendlong(update.message, "\n".join(lines), ADMINKB)
+            lines = ["Rejalashtirilgan xabarlar:\n"]
+            for bc_id, sched_at, status, _ in rows:
+                lines.append("#" + str(bc_id) + " - " + sched_at[:16] + " [" + status + "]")
+            await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
-    elif text == "◀️ Orqaga":
+    elif "Orqaga" in text:
         ud.clear()
-        await update.message.replytext("👑 Admin panel:", replymarkup=ADMIN_KB)
+        await update.message.reply_text("Admin panel:", reply_markup=ADMIN_KB)
 
-    elif text == "👑 Yaqinda premium":
-        rows = getpremiumrecent(30)
+    elif "Yaqinda premium" in text:
+        rows = get_premium_recent(30)
         if not rows:
-            await update.message.replytext("Premium foydalanuvchilar yo'q.", replymarkup=ADMIN_KB)
+            await update.message.reply_text("Premium foydalanuvchilar yoq.", reply_markup=ADMIN_KB)
             return
-        lines = ["👑 Yaqinda premium olganlar:\n"]
+        lines = ["Yaqinda premium olganlar:\n"]
         for uid, fname, uname, cnt, until in rows:
             d = datetime.fromisoformat(until).strftime("%d.%m.%Y") if until else "?"
-            lines.append(
-                f"• [{fname}](tg://user?id={uid}) @{uname or '—'}\n"
-                f"  🛒 {cnt}× | 📅 {d}"
-            )
-        await sendlong(update.message, "\n".join(lines), ADMINKB)
+            lines.append("- " + str(fname) + " (tg://user?id=" + str(uid) + ") @" + str(uname or "-") + " | " + str(cnt) + "x | " + d)
+        await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
-    elif text == "🏆 Ko'p sotib olgan":
-        rows = getpremiumtop(30)
+    elif "sotib olgan" in text:
+        rows = get_premium_top(30)
         if not rows:
-            await update.message.replytext("Ma'lumot yo'q.", replymarkup=ADMIN_KB)
+            await update.message.reply_text("Ma'lumot yoq.", reply_markup=ADMIN_KB)
             return
-        lines = ["🏆 Eng ko'p premium olganlar:\n"]
+        lines = ["Eng kop premium olganlar:\n"]
         for i, (uid, fname, uname, cnt, _) in enumerate(rows, 1):
-            m = ["🥇","🥈","🥉"][i-1] if i <= 3 else f"{i}."
-            lines.append(f"{m} [{fname}](tg://user?id={uid}) @{uname or '—'} — {cnt}×")
-        await sendlong(update.message, "\n".join(lines), ADMINKB)
+            lines.append(str(i) + ". " + str(fname) + " (tg://user?id=" + str(uid) + ") @" + str(uname or "-") + " - " + str(cnt) + "x")
+        await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
-    elif text == "✅ Premium berish":
+    elif "Premium berish" in text:
         ud["st"] = "grant_id"
-        await update.message.reply_text(
-            "🆔 ID va ixtiyoriy kun kiriting:\nFormat: ID [kun]\nMisol: 123456 30",
-        )
+        await update.message.reply_text("ID va ixtiyoriy kun kiriting:\nMisol: 123456 30")
 
-    elif text == "❌ Premium olish":
+    elif "Premium olish" in text:
         ud["st"] = "revoke_id"
-        await update.message.reply_text(
-            "🆔 Premium bekor qilish uchun ID kiriting:",
-        )
+        await update.message.reply_text("Premium bekor qilish uchun ID kiriting:")
 
-    elif text == "🚫 Ban":
+    elif text.strip() == "Ban" or ("Ban" in text and "Unban" not in text and "Banlanganlar" not in text and len(text) < 10):
         ud["st"] = "ban_id"
-        await update.message.reply_text(
-            "🆔 Ban qilish uchun ID kiriting:\nFormat: ID [sabab]",
-        )
+        await update.message.reply_text("Ban qilish uchun ID kiriting:\nFormat: ID [sabab]")
 
-    elif text == "✅ Unban":
+    elif "Unban" in text:
         ud["st"] = "unban_id"
-        await update.message.reply_text(
-            "🆔 Unban qilish uchun ID kiriting:",
-        )
+        await update.message.reply_text("Unban qilish uchun ID kiriting:")
 
-    elif text == "📋 Banlanganlar":
-        rows = getbannedusers(30)
+    elif "Banlanganlar" in text:
+        rows = get_banned_users(30)
         if not rows:
-            await update.message.replytext("✅ Banlangan foydalanuvchilar yo'q.", replymarkup=ADMIN_KB)
+            await update.message.reply_text("Banlangan foydalanuvchilar yoq.", reply_markup=ADMIN_KB)
             return
-        lines = ["🚫 Banlangan foydalanuvchilar:\n"]
+        lines = ["Banlangan foydalanuvchilar:\n"]
         for uid, fname, uname, reason in rows:
-            lines.append(
-                f"• [{fname}](tg://user?id={uid}) @{uname or '—'}\n"
-                f"  📝 {reason or 'Sabab yoq'}"
-            )
-        await sendlong(update.message, "\n".join(lines), ADMINKB)
+            lines.append("- " + str(fname) + " (tg://user?id=" + str(uid) + ") @" + str(uname or "-") + " | " + str(reason or "Sabab yoq"))
+        await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
-    elif text == "📋 Kutayotgan to'lovlar":
-        rows = getpendingpayments(20)
+    elif "Kutayotgan" in text:
+        rows = get_pending_payments(20)
         if not rows:
-            await update.message.replytext("✅ Kutayotgan to'lovlar yo'q.", replymarkup=ADMIN_KB)
+            await update.message.reply_text("Kutayotgan tolovlar yoq.", reply_markup=ADMIN_KB)
             return
-        lines = ["💳 Kutayotgan to'lovlar:\n"]
+        lines = ["Kutayotgan tolovlar:\n"]
         for pid, uid, fname, uname, _, dt in rows:
-            lines.append(f"• #{pid} [{fname}](tg://user?id={uid}) — {dt[:16]}")
-        await sendlong(update.message, "\n".join(lines), ADMINKB)
+            lines.append("#" + str(pid) + " " + str(fname or "?") + " (tg://user?id=" + str(uid) + ") - " + dt[:16])
+        await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
-    elif text == "💳 To'lov matni":
-        ud["stedit"] = "paymenttext"
-        await update.message.reply_text(
-            "To'lov matni - qaysi tilni tahrirlaysiz?",
-            replymarkup=LANGEDIT_KB,
-        )
+    elif "lov matni" in text:
+        ud["st_edit"] = "payment_text"
+        await update.message.reply_text("Tolov matni - qaysi tilni tahrirlaysiz?", reply_markup=LANG_EDIT_KB)
 
-    elif text == "❓ Help matni":
-        ud["stedit"] = "helptext"
-        await update.message.reply_text(
-            "Help matni - qaysi tilni tahrirlaysiz?",
-            replymarkup=LANGEDIT_KB,
-        )
+    elif "Help matni" in text:
+        ud["st_edit"] = "help_text"
+        await update.message.reply_text("Help matni - qaysi tilni tahrirlaysiz?", reply_markup=LANG_EDIT_KB)
 
-    elif text in ("🇺🇿 O'zbek matni", "🇷🇺 Rus matni", "🇬🇧 Ingliz matni"):
-        editkey = ud.get("stedit")
-        if not edit_key:
-            await update.message.replytext("❌ Avval matni tanlang.", replymarkup=ADMIN_KB)
-            return
-        lang_map = {
-            "🇺🇿 O'zbek matni": "uz",
-            "🇷🇺 Rus matni":     "ru",
-            "🇬🇧 Ingliz matni":  "en",
-        }
-        lang = lang_map[text]
-        state_map = {
-            ("paymenttext", "uz"): "editpay_uz",
-            ("paymenttext", "ru"): "editpay_ru",
-            ("paymenttext", "en"): "editpay_en",
-            ("helptext",    "uz"): "edithelp_uz",
-            ("helptext",    "ru"): "edithelp_ru",
-            ("helptext",    "en"): "edithelp_en",
-        }
-        ud["st"] = statemap.get((editkey, lang))
-        current = getsetting(editkey).get(lang, "")
-        await update.message.reply_text(
-            f"📝 Joriy matn ({lang.upper()}):\n\n{current}\n\n"
-            "Yangi matnni yuboring:",
-            replymarkup=CANCELKB,
-        )
-
-    elif text == "🎟 Promo kodlar":
-        rows = getpromolist()
+    elif "Promo kodlar" in text and "yaratish" not in text:
+        rows = get_promo_list()
         if not rows:
-            await update.message.replytext("Promo kodlar yo'q.", replymarkup=ADMIN_KB)
+            await update.message.reply_text("Promo kodlar yoq.", reply_markup=ADMIN_KB)
             return
-        lines = ["🎟 Promo kodlar:\n"]
-        for code, days, maxu, used, active,  in rows:
-            status = "✅" if active else "❌"
-            maxstr = str(maxu) if max_u != -1 else "∞"
-            lines.append(f"{status} {code} — {days} kun | {used}/{max_str}")
-        await sendlong(update.message, "\n".join(lines), ADMINKB)
+        lines = ["Promo kodlar:\n"]
+        for code, days, max_u, used, active, _ in rows:
+            status  = "Aktiv" if active else "Nofaol"
+            max_str = str(max_u) if max_u != -1 else "Cheksiz"
+            lines.append(status + " | " + code + " - " + str(days) + " kun | " + str(used) + "/" + max_str)
+        await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
-    elif text == "➕ Promo yaratish":
+    elif "Promo yaratish" in text:
         ud["st"] = "promo_create"
-        await update.message.reply_text(
-            "🎟 Promo kod yaratish:\n\n"
-            "Format: KOD KUN MAXFOYDALANISH_\n"
-            "Misol: SUMMER50 30 100\n"
-            "(maxfoydalanish: -1 = cheksiz)_",
-        )
+        await update.message.reply_text("Promo kod yaratish:\nFormat: KOD KUN MAX\nMisol: SUMMER50 30 100")
 
     else:
-        await update.message.replytext("👑 Admin panel:", replymarkup=ADMIN_KB)
+        await update.message.reply_text("Admin panel:", reply_markup=ADMIN_KB)
 
 
-# ════════════════════════════════════════════════════════
-#  ADMIN CALLBACK (to'lov tasdiqlash)
-# ════════════════════════════════════════════════════════
-async def oncallback(update: Update, context: ContextTypes.DEFAULTTYPE):
+async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     q    = update.callback_query
     data = q.data
     u    = q.from_user
     await q.answer()
 
-    if data.startswith("admpay:"):
-        _, action, pid_str = data.split(":")
-        pid = int(pid_str)
-        pay = get_payment(pid)
+    if not data.startswith("admpay:"):
+        return
 
-        if not pay:
-            await q.message.reply_text("❌ To'lov topilmadi.")
-            return
+    parts  = data.split(":")
+    action = parts[1]
+    pid    = int(parts[2])
+    pay    = get_payment(pid)
 
-        tid = pay[1]
+    if not pay:
+        await q.message.reply_text("Tolov topilmadi.")
+        return
 
-        if action == "approve":
-            setpaymentstatus(pid, "approved")
-            until = grantpremium(tid, PREMIUMDAYS)
+    tid = pay[1]
 
-            from database import get_lang
-            from translations import tx
-            tl = get_lang(tid)
-            try:
-                await context.bot.send_message(
-                    tid,
-                    tx(tl, "pay_confirmed",
-                       days=PREMIUM_DAYS, until=until.strftime("%d.%m.%Y")),
-                )
-            except Exception:
-                pass
+    if action == "approve":
+        set_payment_status(pid, "approved")
+        until = grant_premium(tid, PREMIUM_DAYS)
+        from database import get_lang
+        from translations import tx
+        tl = get_lang(tid)
+        try:
+            await context.bot.send_message(tid, tx(tl, "pay_confirmed", days=PREMIUM_DAYS, until=until.strftime("%d.%m.%Y")))
+        except Exception:
+            pass
+        new_cap = (q.message.caption or "") + "\n\nTASDIQLANDI - " + u.first_name + " " + datetime.now().strftime("%H:%M")
+        try:
+            await q.message.edit_caption(new_cap)
+        except Exception:
+            pass
 
-            new_cap = (q.message.caption or "") + \
-                      f"\n\n✅ TASDIQLANDI — {u.first_name} {datetime.now().strftime('%H:%M')}"
-            try:
-                await q.message.editcaption(newcap)
-            except Exception:
-                pass
-
-        elif action == "reject":
-            setpaymentstatus(pid, "rejected")
-
-            from database import get_lang
-            from translations import tx
-            tl = get_lang(tid)
-            try:
-                await context.bot.send_message(
-                    tid, tx(tl, "pay_rejected")
-                )
-            except Exception:
-                pass
-
-            new_cap = (q.message.caption or "") + \
-                      f"\n\n❌ RAD ETILDI — {u.first_name} {datetime.now().strftime('%H:%M')}"
-            try:
-                await q.message.editcaption(newcap)
-            except Exception:
-                pass
-                
+    elif action == "reject":
+        set_payment_status(pid, "rejected")
+        from database import get_lang
+        from translations import tx
+        tl = get_lang(tid)
+        try:
+            await context.bot.send_message(tid, tx(tl, "pay_rejected"))
+        except Exception:
+            pass
+        new_cap = (q.message.caption or "") + "\n\nRAD ETILDI - " + u.first_name + " " + datetime.now().strftime("%H:%M")
+        try:
+            await q.message.edit_caption(new_cap)
+        except Exception:
+            pass
