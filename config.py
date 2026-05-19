@@ -16,7 +16,7 @@ DB_PATH          = "vtvs.db"
 # ── Premium ───────────────────────────────────────────────
 PREMIUM_DAYS     = 30
 PREMIUM_PRICE    = "$3"
-STARS_AMOUNT     = 150        # Telegram Stars narxi
+STARS_AMOUNT     = 1        # Telegram Stars narxi
 FREE_DAILY_LIMIT = 5          # Bepul kunlik limit
 REFERRAL_BONUS   = 3          # Referal uchun bonus (kun)
 
