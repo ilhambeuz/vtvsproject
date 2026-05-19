@@ -1,5 +1,3 @@
-Copy
-
 """
 ⌨️ VTVS Bot — Klaviaturalar
 Foydalanuvchi: faqat InlineKeyboard
