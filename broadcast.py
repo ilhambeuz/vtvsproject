@@ -4,12 +4,12 @@
 import asyncio
 import json
 import logging
-
+ 
 from telegram import InputMediaPhoto, InputMediaVideo
-
+ 
 logger = logging.getLogger(__name__)
-
-
+ 
+ 
 # ════════════════════════════════════════════════════════
 #  PROGRESS
 # ════════════════════════════════════════════════════════
@@ -24,8 +24,8 @@ async def _update_progress(msg, label: str, done: int, total: int, ok: int, fail
         )
     except Exception:
         pass
-
-
+ 
+ 
 # ════════════════════════════════════════════════════════
 #  XABAR YUBORISH YORDAMCHISI
 # ════════════════════════════════════════════════════════
@@ -39,12 +39,12 @@ def msg_to_dict(msg) -> dict:
         "fwd_chat": None,
         "fwd_mid":  None,
     }
-    if msg.forward_origin or msg.forward_from or msg.forward_from_chat:
+    if msg.forward_origin:
         d["type"]     = "forward"
         d["fwd_chat"] = msg.chat.id
         d["fwd_mid"]  = msg.message_id
         return d
-
+ 
     if msg.text:
         d["type"] = "text"
     elif msg.photo:
@@ -64,8 +64,8 @@ def msg_to_dict(msg) -> dict:
     elif msg.video_note:
         d["type"], d["file_id"] = "video_note", msg.video_note.file_id
     return d
-
-
+ 
+ 
 async def _send_one(bot, uid: int, src: dict) -> bool:
     """Bitta foydalanuvchiga xabar yuborish. True=muvaffaqiyatli."""
     try:
@@ -74,7 +74,7 @@ async def _send_one(bot, uid: int, src: dict) -> bool:
         cap = src.get("caption", "")
         txt = src.get("text", "")
         pm  = "Markdown" if cap else None
-
+ 
         if t == "text":
             await bot.send_message(
                 uid, txt, parse_mode="Markdown",
@@ -105,8 +105,8 @@ async def _send_one(bot, uid: int, src: dict) -> bool:
         return True
     except Exception:
         return False
-
-
+ 
+ 
 # ════════════════════════════════════════════════════════
 #  BROADCAST FUNKSIYALARI
 # ════════════════════════════════════════════════════════
@@ -115,20 +115,20 @@ async def broadcast_single(bot, src: dict, uids: list, prog_msg) -> tuple[int, i
     ok = fail = 0
     total = len(uids)
     label = "📢 *Yuborilmoqda...*"
-
+ 
     for i, uid in enumerate(uids):
         if await _send_one(bot, uid, src):
             ok += 1
         else:
             fail += 1
-
+ 
         if (i + 1) % 100 == 0 or (i + 1) == total:
             await _update_progress(prog_msg, label, i + 1, total, ok, fail)
         await asyncio.sleep(0.04)
-
+ 
     return ok, fail
-
-
+ 
+ 
 async def broadcast_album(
     bot, items: list, caption: str, uids: list, prog_msg
 ) -> tuple[int, int]:
@@ -136,7 +136,7 @@ async def broadcast_album(
     ok = fail = 0
     total = len(uids)
     label = "🖼 *Reklama yuborilmoqda...*"
-
+ 
     # InputMedia ro'yxatini bir marta tuzish
     album = []
     for idx, item in enumerate(items):
@@ -150,7 +150,7 @@ async def broadcast_album(
             album.append(
                 InputMediaVideo(media=item["file_id"], caption=cap_here, parse_mode=pm)
             )
-
+ 
     for i, uid in enumerate(uids):
         try:
             if len(album) == 1:
@@ -172,14 +172,14 @@ async def broadcast_album(
             ok += 1
         except Exception:
             fail += 1
-
+ 
         if (i + 1) % 100 == 0 or (i + 1) == total:
             await _update_progress(prog_msg, label, i + 1, total, ok, fail)
         await asyncio.sleep(0.05)
-
+ 
     return ok, fail
-
-
+ 
+ 
 def done_text(label: str, ok: int, fail: int, total: int, extra: str = "") -> str:
     return (
         f"✅ *{label}*\n\n"
@@ -188,3 +188,4 @@ def done_text(label: str, ok: int, fail: int, total: int, extra: str = "") -> st
         f"📊 Jami: *{total}*"
         + (f"\n{extra}" if extra else "")
     )
+ 
