@@ -266,12 +266,13 @@ def yt_download(url: str, quality: str, uid: int) -> str | None:
     import yt_dlp
 
     fmt_map = {
-    "360":   "bestvideo[height<=360]+bestaudio/best[height<=360]/best",
-    "480":   "bestvideo[height<=480]+bestaudio/best[height<=480]/best",
-    "720":   "bestvideo[height<=720]+bestaudio/best[height<=720]/best",
-    "1080":  "bestvideo[height<=1080]+bestaudio/best[height<=1080]/best",
-    "audio": "bestaudio/best",
-}
+        "360":   "best[height<=360]/best",
+        "480":   "best[height<=480]/best",
+        "720":   "best[height<=720]/best",
+        "1080":  "best[height<=1080]/best",
+        "audio": "bestaudio/best",
+    }
+
     out_tpl = _tmp(uid, f"yt_{quality}_%(id)s.%(ext)s")
 
     ydl_opts = {
