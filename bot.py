@@ -80,7 +80,7 @@ async def limit_check(update: Update, uid: int, lang: str) -> bool:
     if not check_limit(uid):
         await update.message.reply_text(
             tx(lang, "limit_reached", limit=FREE_DAILY_LIMIT),
-            parse_mode="Markdown",
+            parse_mode="HTML",
             reply_markup=renew_kb(lang),
         )
         return False
@@ -117,7 +117,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                             ref_id,
                             tx(ref_lang, "ref_bonus_received",
                                name=u.first_name, bonus=3) + f"\n\n{note}",
-                            parse_mode="Markdown",
+                            parse_mode="HTML",
                         )
                     except Exception:
                         pass
@@ -129,14 +129,17 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         from keyboards import ADMIN_KB
         await update.message.reply_text(
             f"👑 *Admin panel*\n👤 {u.first_name}",
-            parse_mode="Markdown",
+            parse_mode="HTML",
             reply_markup=ADMIN_KB,
         )
         return
 
-    # Yangi foydalanuvchi → til tanlash
+    # Yangi foydalanuvchi → til tanlash (faqat hech narsa qilmaganlar)
     row = get_user(u.id)
-    if row and row[3] == "en" and not args:
+    # row[13] = total_processed, row[12] = bonus_days, row[6] = purchase_count
+    # Agar foydalanuvchi biror narsa qilgan bo'lsa - eski foydalanuvchi
+    is_new_user = row and row[3] == "en" and row[13] == 0 and row[6] == 0
+    if is_new_user and not args:
         await update.message.reply_text(
             tx("uz", "choose_lang"), reply_markup=lang_kb()
         )
@@ -155,7 +158,7 @@ async def _show_welcome(update: Update, u):
         tx(lang, "welcome",
            name=u.first_name, plan=plan,
            used=used_today(u.id), limit=lim),
-        parse_mode="Markdown",
+        parse_mode="HTML",
         reply_markup=main_menu_kb(lang),
     )
 
@@ -184,12 +187,12 @@ async def cmd_premium(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             tx(lang, "already_premium",
                until=until.strftime("%d.%m.%Y") if until else "?"),
-            parse_mode="Markdown",
+            parse_mode="HTML",
         )
         return
     pay_text = get_payment_text(lang)
     await update.message.reply_text(
-        pay_text, parse_mode="Markdown", reply_markup=premium_kb(lang)
+        pay_text, parse_mode="HTML", reply_markup=premium_kb(lang)
     )
 
 
@@ -208,7 +211,7 @@ async def cmd_referral(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         tx(lang, "ref_info",
            bonus=3, link=link, count=count, days=bonus),
-        parse_mode="Markdown",
+        parse_mode="HTML",
     )
 
 
@@ -236,7 +239,7 @@ async def cmd_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
            name=u.first_name, plan=plan, until=until_tx,
            used=used_today(u.id), limit=lim,
            total=total, refs=ref_count(u.id), since=since),
-        parse_mode="Markdown",
+        parse_mode="HTML",
     )
 
 
@@ -249,7 +252,7 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     lang = get_lang(u.id)
     text = get_help_text(lang)
-    await update.message.reply_text(text, parse_mode="Markdown")
+    await update.message.reply_text(text, parse_mode="HTML")
 
 
 # ════════════════════════════════════════════════════════
@@ -342,7 +345,7 @@ async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await status.edit_text(
         tx(lang, "choose_action", dur=fmt_time(dur)),
-        parse_mode="Markdown",
+        parse_mode="HTML",
         reply_markup=action_kb(lang, prem),
     )
 
@@ -376,16 +379,16 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         sec = parse_time(text)
         dur = ud.get("src_dur", 0)
         if sec is None:
-            await update.message.reply_text(tx(lang, "bad_time"), parse_mode="Markdown")
+            await update.message.reply_text(tx(lang, "bad_time"), parse_mode="HTML")
             return
         if dur and sec >= dur:
-            await update.message.reply_text(tx(lang, "time_over", dur=fmt_time(dur)), parse_mode="Markdown")
+            await update.message.reply_text(tx(lang, "time_over", dur=fmt_time(dur)), parse_mode="HTML")
             return
         ud.pop("trim_start_wait", None)
         ud["trim_s"]       = sec
         ud["trim_end_wait"] = True
         await update.message.reply_text(
-            tx(lang, "enter_end", start=fmt_time(sec)), parse_mode="Markdown"
+            tx(lang, "enter_end", start=fmt_time(sec)), parse_mode="HTML"
         )
         return
 
@@ -396,7 +399,7 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Screenshot kutilmoqda
     if ud.get("await_ss"):
-        await update.message.reply_text(tx(lang, "send_screenshot"), parse_mode="Markdown")
+        await update.message.reply_text(tx(lang, "send_screenshot"), parse_mode="HTML")
         return
 
     # Promo kod
@@ -407,12 +410,12 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             grant_premium(u.id, result["days"])
             await update.message.reply_text(
                 tx(lang, "promo_ok", days=result["days"]),
-                parse_mode="Markdown",
+                parse_mode="HTML",
             )
         else:
             reason = result.get("reason", "invalid")
             key = "promo_used" if reason == "used" else "promo_invalid"
-            await update.message.reply_text(tx(lang, key), parse_mode="Markdown")
+            await update.message.reply_text(tx(lang, key), parse_mode="HTML")
         return
 
     await update.message.reply_text(tx(lang, "hint"))
@@ -427,13 +430,13 @@ async def _do_trim_end(update, context, text, lang):
     src   = ud.get("src_path")
 
     if sec is None:
-        await update.message.reply_text(tx(lang, "bad_time"), parse_mode="Markdown")
+        await update.message.reply_text(tx(lang, "bad_time"), parse_mode="HTML")
         return
     if sec <= start:
-        await update.message.reply_text(tx(lang, "end_before_start"), parse_mode="Markdown")
+        await update.message.reply_text(tx(lang, "end_before_start"), parse_mode="HTML")
         return
     if dur and sec > dur:
-        await update.message.reply_text(tx(lang, "time_over", dur=fmt_time(dur)), parse_mode="Markdown")
+        await update.message.reply_text(tx(lang, "time_over", dur=fmt_time(dur)), parse_mode="HTML")
         return
     if not src or not os.path.exists(src):
         await update.message.reply_text(tx(lang, "no_file"))
@@ -489,13 +492,13 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         try:
             await context.bot.send_photo(
                 aid, photo=fid, caption=caption,
-                parse_mode="Markdown",
+                parse_mode="HTML",
                 reply_markup=admin_pay_kb(pid),
             )
         except Exception as e:
             logger.error("Admin %s ga yuborishda xatolik: %s", aid, e)
 
-    await update.message.reply_text(tx(lang, "screenshot_sent"), parse_mode="Markdown")
+    await update.message.reply_text(tx(lang, "screenshot_sent"), parse_mode="HTML")
 
 
 # ════════════════════════════════════════════════════════
@@ -532,7 +535,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await q.message.reply_text(
             tx(nl, "welcome", name=u.first_name, plan=plan,
                used=used_today(u.id), limit=lim),
-            parse_mode="Markdown",
+            parse_mode="HTML",
             reply_markup=main_menu_kb(nl),
         )
         return
@@ -547,12 +550,12 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 await q.message.reply_text(
                     tx(lang, "already_premium",
                        until=until_dt.strftime("%d.%m.%Y") if until_dt else "?"),
-                    parse_mode="Markdown",
+                    parse_mode="HTML",
                 )
                 return
             pay_text = get_payment_text(lang)
             await q.message.reply_text(
-                pay_text, parse_mode="Markdown", reply_markup=premium_kb(lang)
+                pay_text, parse_mode="HTML", reply_markup=premium_kb(lang)
             )
 
         elif action == "status":
@@ -572,7 +575,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                    name=u.first_name, plan=plan, until=until_tx,
                    used=used_today(u.id), limit=lim,
                    total=total, refs=ref_count(u.id), since=since),
-                parse_mode="Markdown",
+                parse_mode="HTML",
             )
 
         elif action == "ref":
@@ -582,7 +585,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             link  = f"https://t.me/{BOT_USERNAME}?start=ref_{u.id}"
             await q.message.reply_text(
                 tx(lang, "ref_info", bonus=3, link=link, count=count, days=bonus),
-                parse_mode="Markdown",
+                parse_mode="HTML",
             )
 
         elif action == "stats":
@@ -602,7 +605,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                    name=u.first_name, plan=plan, until=until_tx,
                    used=used_today(u.id), limit=lim,
                    total=total, refs=ref_count(u.id), since=since),
-                parse_mode="Markdown",
+                parse_mode="HTML",
             )
 
         elif action == "lang":
@@ -633,13 +636,13 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         elif method == "screenshot":
             ud["await_ss"] = True
             await q.message.reply_text(
-                tx(lang, "send_screenshot"), parse_mode="Markdown"
+                tx(lang, "send_screenshot"), parse_mode="HTML"
             )
 
         elif method == "promo":
             ud["await_promo"] = True
             await q.message.reply_text(
-                tx(lang, "enter_promo"), parse_mode="Markdown"
+                tx(lang, "enter_promo"), parse_mode="HTML"
             )
         return
 
@@ -653,7 +656,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if src:
                 await q.message.edit_text(
                     tx(lang, "choose_action", dur=fmt_time(dur)),
-                    parse_mode="Markdown",
+                    parse_mode="HTML",
                     reply_markup=action_kb(lang, is_premium(u.id)),
                 )
             return
@@ -679,7 +682,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ud["trim_start_wait"] = True
             await q.message.edit_text(
                 tx(lang, "enter_start", dur=fmt_time(dur)),
-                parse_mode="Markdown",
+                parse_mode="HTML",
             )
 
         elif act == "speed":
@@ -691,7 +694,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 return
             await q.message.edit_text(
                 tx(lang, "choose_speed"),
-                parse_mode="Markdown",
+                parse_mode="HTML",
                 reply_markup=speed_kb(lang),
             )
 
@@ -764,7 +767,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not prem and quality not in ("360", "audio"):
             await q.message.edit_text(
                 tx(lang, "free_quality_only"),
-                parse_mode="Markdown",
+                parse_mode="HTML",
                 reply_markup=renew_kb(lang),
             )
             return
@@ -825,7 +828,7 @@ async def _check_limit_cb(q, uid: int, lang: str) -> bool:
     if not check_limit(uid):
         await q.message.edit_text(
             tx(lang, "limit_reached", limit=FREE_DAILY_LIMIT),
-            parse_mode="Markdown",
+            parse_mode="HTML",
             reply_markup=renew_kb(lang),
         )
         return False
@@ -839,11 +842,9 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE, url: st
     u    = update.effective_user
     lang = get_lang(u.id)
     msgs = {
-        "uz": "⏳ YouTube/Instagram yuklab olish hozircha texnik ishlar sababli vaqtincha ochirilib turibdi. Tez orada qayta ishga tushiriladi!",
-
-        "ru": "⏳ Загрузка YouTube/Instagram временно отключена по техническим причинам. Скоро снова заработает!",
-
-        "en": "⏳ YouTube/Instagram downloading is temporarily disabled due to maintenance. It will be back soon!",
+        "uz": "⏳ YouTube/Instagram yuklab olish hozircha vaqtincha ochirilib turibdi. Tez orada qayta ishga tushiriladi!",
+        "ru": "⏳ Загрузка YouTube/Instagram временно отключена. Скоро снова заработает!",
+        "en": "⏳ YouTube/Instagram downloading is temporarily disabled. It will be back soon!",
     }
     await update.message.reply_text(msgs.get(lang, msgs["en"]))
 
@@ -866,7 +867,7 @@ async def successful_payment(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await update.message.reply_text(
         tx(lang, "stars_success",
            days=PREMIUM_DAYS, until=until.strftime("%d.%m.%Y")),
-        parse_mode="Markdown",
+        parse_mode="HTML",
     )
     logger.info("Stars to'lov: user=%s, amount=%s", u.id, charge.total_amount)
 
