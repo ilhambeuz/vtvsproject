@@ -148,7 +148,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             f"🖼 *Tasdiqlang:*\n\n"
             f"📸 {p} rasm | 🎬 {v} video\n"
-            f"📝 _{cap_prev or 'Yo\\'q'}_\n"
+            f"📝 _{cap_prev or 'Yoq'}_\n"
             f"👥 *{len(uids)}* ta foydalanuvchi\n\nYuborilsinmi?",
             parse_mode="Markdown",
             reply_markup=CONFIRM_KB,
@@ -561,7 +561,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for uid, fname, uname, reason in rows:
             lines.append(
                 f"• [{fname}](tg://user?id={uid}) @{uname or '—'}\n"
-                f"  📝 _{reason or 'Sabab yo\\'q'}_"
+                f"  📝 _{reason or 'Sabab yoq'}_"
             )
         await send_long(update.message, "\n".join(lines), ADMIN_KB)
 
