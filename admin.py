@@ -31,15 +31,14 @@ logger = logging.getLogger(__name__)
 
 # Admin keyboard barcha tugmalari - state bilan konflikt bo'lmasin
 ADMIN_MENU_BTNS = {
-    '📊 Statistika', '🌍 Davlatlar', '📢 Xabar yuborish',
-    '📅 Rejalashtirilgan', '👑 Yaqinda premium', '🏆 Ko'p sotib olgan',
-    '✅ Premium berish', '❌ Premium olish', '🚫 Ban', '✅ Unban',
-    '📋 Banlanganlar', '📋 Kutayotgan to'lovlar', '💳 To'lov matni',
-    '❓ Help matni', '🎟 Promo kodlar', '➕ Promo yaratish',
-    '✍️ Oddiy xabar', '↩️ Forward rejim', '🖼 Ko'p mediali reklama',
-    '📅 Rejalashtirilgan', '◀️ Orqaga', '❌ Bekor',
-    '✅ Ha, yubor', '⏭ Caption yo'q',
-    '🇺🇿 O'zbek matni', '🇷🇺 Rus matni', '🇬🇧 Ingliz matni',
+    "📊 Statistika", "🌍 Davlatlar", "📢 Xabar yuborish",
+    "📅 Rejalashtirilgan", "👑 Yaqinda premium", "🏆 Ko'p sotib olgan",
+    "✅ Premium berish", "❌ Premium olish", "🚫 Ban", "✅ Unban",
+    "📋 Banlanganlar", "📋 Kutayotgan to'lovlar", "💳 To'lov matni",
+    "❓ Help matni", "🎟 Promo kodlar", "➕ Promo yaratish",
+    "✍️ Oddiy xabar", "↩️ Forward rejim", "🖼 Ko'p mediali reklama",
+    "◀️ Orqaga", "❌ Bekor", "✅ Ha, yubor", "⏭ Caption yo'q",
+    "🇺🇿 O'zbek matni", "🇷🇺 Rus matni", "🇬🇧 Ingliz matni",
 }
 
 
