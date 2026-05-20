@@ -300,7 +300,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "zbek matni" in text:
         edit_key = ud.get("st_edit")
         if edit_key:
-            ud["st"] = "edit_" + edit_key.replace("_text","") + "_uz"
+            ud["st"] = "edit_pay_uz" if edit_key == "payment_text" else "edit_help_uz"
             current  = get_setting(edit_key).get("uz", "")
             await update.message.reply_text("Joriy (UZ):\n" + current + "\n\nYangi matnni yuboring:", reply_markup=CANCEL_KB)
         return
@@ -308,7 +308,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "Rus matni" in text:
         edit_key = ud.get("st_edit")
         if edit_key:
-            ud["st"] = "edit_" + edit_key.replace("_text","") + "_ru"
+            ud["st"] = "edit_pay_ru" if edit_key == "payment_text" else "edit_help_ru"
             current  = get_setting(edit_key).get("ru", "")
             await update.message.reply_text("Joriy (RU):\n" + current + "\n\nYangi matnni yuboring:", reply_markup=CANCEL_KB)
         return
@@ -316,7 +316,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if "Ingliz matni" in text:
         edit_key = ud.get("st_edit")
         if edit_key:
-            ud["st"] = "edit_" + edit_key.replace("_text","") + "_en"
+            ud["st"] = "edit_pay_en" if edit_key == "payment_text" else "edit_help_en"
             current  = get_setting(edit_key).get("en", "")
             await update.message.reply_text("Joriy (EN):\n" + current + "\n\nYangi matnni yuboring:", reply_markup=CANCEL_KB)
         return
