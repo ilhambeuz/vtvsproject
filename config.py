@@ -5,8 +5,8 @@ Faqat shu faylni o'zgartirasiz, boshqa fayllarni tegmaysiz.
 import os
 
 # ── Asosiy ────────────────────────────────────────────────
-BOT_TOKEN        = os.getenv("BOT_TOKEN", "8229173995:AAH3JMphJYqsxk8xotgyUdEfqKzyCdl7jSo")
-BOT_USERNAME     = "abdulhamidbot"   # @ siz (t.me/...)
+BOT_TOKEN        = os.getenv("BOT_TOKEN", "8968224446:AAGkFSnwwmG7JxN8CtszeJjiqoEjC8jYORM")
+BOT_USERNAME     = "vtvstudiobot"   # @ siz (t.me/...)
 ADMIN_IDS        = [5016497622]           # Bir nechta admin: [111, 222, 333]
 
 # ── Fayllar ───────────────────────────────────────────────
